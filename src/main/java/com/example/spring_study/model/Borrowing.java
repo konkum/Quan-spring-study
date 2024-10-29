@@ -1,6 +1,7 @@
 package com.example.spring_study.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -16,6 +17,8 @@ public class Borrowing {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private DateAudit dateAudit;
+    @NonNull
+    @Min(value = 0, message = "Total Price have to be a non negative number")
     private Double totalPrice;
     @OneToOne
     private Employee employee;
@@ -31,14 +34,14 @@ public class Borrowing {
     }
 
     public void updateTotalPrice() {
-        this.totalPrice= devices.stream().mapToDouble(Device::calculateTotalPrice).sum();
+        this.totalPrice = devices.stream().mapToDouble(Device::calculateTotalPrice).sum();
     }
 
-    public void removeDevice(Device device){
+    public void removeDevice(Device device) {
         devices.remove(device);
     }
 
-    public void addDevice(Device device){
+    public void addDevice(Device device) {
         devices.add(device);
     }
 }

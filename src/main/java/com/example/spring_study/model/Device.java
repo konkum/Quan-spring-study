@@ -3,12 +3,12 @@ package com.example.spring_study.model;
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.Type;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.ToString;
-
-import java.time.LocalDate;
 
 @Data
 @Entity
@@ -18,13 +18,21 @@ public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @NonNull
     private Type type;
+    @NonNull
+    @Min(value = 0, message = "Unit price must be non-negative")
     private Double unitPrice;
+    @NonNull
     private RateType rateType;
     private DateAudit dateAudit;
+    @NonNull
     private String branchName;
+    @NonNull
     private String itemName;
     private String version;
+    @NonNull
+    @Min(value = 0, message = "Original price must be non-negative")
     private Double originalPrice;
 
     public Device(Type type, Double unitPrice, RateType rateType, String branchName, String itemName, String version, Double originalPrice) {
@@ -38,7 +46,7 @@ public class Device {
         this.originalPrice = originalPrice;
     }
 
-    public Device(){
+    public Device() {
         dateAudit = new DateAudit();
     }
 

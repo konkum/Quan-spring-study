@@ -24,12 +24,12 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device createDevice(DeviceRequest request) {
-        try{
+        try {
             Type type = Type.valueOf(request.getType());
             RateType rateType = RateType.valueOf(request.getRateType());
-            Device response = new Device(type,request.getUnitPrice(),rateType,request.getBranchName(),request.getItemName(),request.getVersion(),request.getOriginalPrice());
+            Device response = new Device(type, request.getUnitPrice(), rateType, request.getBranchName(), request.getItemName(), request.getVersion(), request.getOriginalPrice());
             return deviceRepository.save(response);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -37,10 +37,10 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public Device updateDevice(int id,DeviceRequest request) {
+    public Device updateDevice(int id, DeviceRequest request) {
         try {
             Device device = getDeviceById(id);
-            if (device == null){
+            if (device == null) {
                 return null;
             }
 
@@ -51,10 +51,9 @@ public class DeviceServiceImpl implements DeviceService {
             device.setItemName(request.getItemName());
             device.setVersion(request.getVersion());
             device.setOriginalPrice(request.getOriginalPrice());
-            device.getDateAudit().updateUpdatedAt();
 
             return deviceRepository.save(device);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -68,7 +67,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public boolean deleteDevice(int id) {
-        if (!deviceRepository.existsById(id)){
+        if (!deviceRepository.existsById(id)) {
             return false;
         }
         deviceRepository.deleteById(id);
@@ -78,15 +77,15 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public Page<Device> getAllDevices(BaseSearchRequest request) {
         Sort sort = Sort.by(Sort.Order.asc("id"));
-        Pageable pageable = PageRequest.of(request.getPageNumber(),request.getPageSize(),sort);
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize(), sort);
         return deviceRepository.findAll(pageable);
     }
 
     @Override
     public Page<Device> findDeviceByItemName(String name, BaseSearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNumber(),request.getPageSize());
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Device> devices = deviceRepository.findByItemName(name, pageable);
-        if (devices.isEmpty()){
+        if (devices.isEmpty()) {
             return null;
         }
 
@@ -95,9 +94,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Page<Device> findDeviceByDate(LocalDateTime startDate, LocalDateTime endDate, BaseSearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNumber(),request.getPageSize());
-        Page<Device> devices = deviceRepository.findByDateAudit_CreatedAtBetween(startDate,endDate, pageable);
-        if (devices.isEmpty()){
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
+        Page<Device> devices = deviceRepository.findByDateAudit_CreatedAtBetween(startDate, endDate, pageable);
+        if (devices.isEmpty()) {
             return null;
         }
 
@@ -106,9 +105,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Page<Device> findDeviceByType(Type type, BaseSearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNumber(),request.getPageSize());
-        Page<Device> devices = deviceRepository.findByType(type,pageable);
-        if (devices.isEmpty()){
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
+        Page<Device> devices = deviceRepository.findByType(type, pageable);
+        if (devices.isEmpty()) {
             return null;
         }
 
@@ -117,9 +116,9 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Page<Device> findDeviceByRateType(RateType rateType, BaseSearchRequest request) {
-        Pageable pageable = PageRequest.of(request.getPageNumber(),request.getPageSize());
-        Page<Device> devices = deviceRepository.findByRateType(rateType,pageable);
-        if (devices.isEmpty()){
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
+        Page<Device> devices = deviceRepository.findByRateType(rateType, pageable);
+        if (devices.isEmpty()) {
             return null;
         }
 
@@ -129,13 +128,13 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public Page<Device> getDevicesSortedBy(BaseSortRequest request) {
         Sort sort = Sort.by(Sort.Order.asc(request.getSortString()));
-        if (request.getSortDirection()!=null){
-            switch (request.getSortDirection()){
+        if (request.getSortDirection() != null) {
+            switch (request.getSortDirection()) {
                 case ASC -> sort = Sort.by(Sort.Order.asc(request.getSortString()));
                 case DESC -> sort = Sort.by(Sort.Order.desc(request.getSortString()));
             }
         }
-        Pageable pageable = PageRequest.of(request.getPageNumber(),request.getPageSize(),sort);
+        Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize(), sort);
         return deviceRepository.findAll(pageable);
     }
 }

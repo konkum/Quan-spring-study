@@ -3,6 +3,7 @@ package com.example.spring_study.service.impl;
 import com.example.spring_study.model.Employee;
 import com.example.spring_study.model.payload.EmployeeRequest;
 import com.example.spring_study.repository.EmployeeRepository;
+import com.example.spring_study.repository.RoleRepository;
 import com.example.spring_study.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,13 +13,16 @@ import java.util.List;
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
     private EmployeeRepository employeeRepository;
+
     @Override
     public Employee createEmployee(EmployeeRequest request) {
         try {
-            Employee employee = new Employee(request.getFullName(),request.getAddress(),request.getPhoneNumber(),request.getAccountBalance());
+            Employee employee = new Employee(request.getFullName(), request.getAddress(), request.getPhoneNumber(), request.getAccountBalance());
             return employeeRepository.save(employee);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -28,7 +32,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee updateEmployee(int id, EmployeeRequest request) {
         try {
             Employee employee = getEmployeeById(id);
-            if (employee == null){
+            if (employee == null) {
                 return null;
             }
 
@@ -38,7 +42,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setAccountBalance(request.getAccountBalance());
 
             return employeeRepository.save(employee);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
