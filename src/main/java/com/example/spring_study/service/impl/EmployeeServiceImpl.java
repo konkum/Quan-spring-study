@@ -1,14 +1,22 @@
 package com.example.spring_study.service.impl;
 
+import com.example.spring_study.exception.EmployeeNotFoundException;
+import com.example.spring_study.mapping.EmployeeMapper;
 import com.example.spring_study.model.Employee;
+import com.example.spring_study.model.Role;
 import com.example.spring_study.model.payload.EmployeeRequest;
+import com.example.spring_study.model.payload.EmployeeResponse;
+import com.example.spring_study.model.payload.EmployeeResponseUpdate;
 import com.example.spring_study.repository.EmployeeRepository;
 import com.example.spring_study.repository.RoleRepository;
 import com.example.spring_study.service.EmployeeService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -16,12 +24,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     private RoleRepository roleRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private EmployeeMapper mapper;
 
     @Override
-    public Employee createEmployee(EmployeeRequest request) {
+    public EmployeeResponse createEmployee(EmployeeRequest request) {
         try {
-            Employee employee = new Employee(request.getFullName(), request.getAddress(), request.getPhoneNumber(), request.getAccountBalance());
-            return employeeRepository.save(employee);
+            String encodePassword = passwordEncoder.encode(request.getPassword());
+            Set<Role> roles = roleRepository.findByNameIn(request.getRoles());
+            Employee employee = new Employee(request.getUserName(), encodePassword, request.getFullName(), request.getAddress(), request.getPhoneNumber(), request.getAccountBalance(), roles);
+            return mapper.toResponse(employeeRepository.save(employee));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -29,19 +43,22 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee updateEmployee(int id, EmployeeRequest request) {
+    public EmployeeResponseUpdate updateEmployee(int id, EmployeeRequest request) {
         try {
-            Employee employee = getEmployeeById(id);
-            if (employee == null) {
-                return null;
-            }
+            Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException(id));
 
+            Set<Role> roles = roleRepository.findByNameIn(request.getRoles());
+            employee.setUserName(request.getUserName());
+            employee.setPassword(passwordEncoder.encode(request.getPassword()));
             employee.setFullName(request.getFullName());
             employee.setAddress(request.getAddress());
             employee.setPhoneNumber(request.getPhoneNumber());
             employee.setAccountBalance(request.getAccountBalance());
+            employee.setRoles(roles);
 
-            return employeeRepository.save(employee);
+            EmployeeResponse response = mapper.toResponse(employeeRepository.save(employee));
+
+            return (EmployeeResponseUpdate) response;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -50,13 +67,15 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public Employee getEmployeeById(int id) {
-        return employeeRepository.findById(id).orElse(null);
+    public EmployeeResponse getEmployeeById(int id) {
+        Employee employee = employeeRepository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
+        return mapper.toResponse(employee);
     }
 
     @Override
-    public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+    public List<EmployeeResponse> getAllEmployees() {
+        return mapper.toResponseList(employeeRepository.findAll());
     }
 
     @Override

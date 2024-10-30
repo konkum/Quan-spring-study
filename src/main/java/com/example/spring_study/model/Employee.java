@@ -42,10 +42,13 @@ public class Employee {
     )
     private Set<Role> roles;
 
-    public Employee(String fullName, String address, String phoneNumber, Double accountBalance) {
+    public Employee(String userName, String password, String fullName, String address, String phoneNumber, Double accountBalance, Set<Role> roles) {
+        this.userName = userName;
+        this.password = password;
         this.fullName = fullName;
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.accountBalance = accountBalance;
+        this.roles = roles;
     }
 }

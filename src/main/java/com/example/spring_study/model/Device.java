@@ -9,11 +9,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.ToString;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Data
 @Entity
 @ToString
 @Table(name = "device")
+@EntityListeners(AuditingEntityListener.class)
 public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +27,7 @@ public class Device {
     private Double unitPrice;
     @NonNull
     private RateType rateType;
+    @Embedded
     private DateAudit dateAudit;
     @NonNull
     private String branchName;

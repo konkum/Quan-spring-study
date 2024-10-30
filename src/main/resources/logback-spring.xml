@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- Set log path and log file name -->
+    <property name="LOG_PATH" value="./logs"/>
+    <property name="LOG_FILE_NAME" value="application_logback"/>
+
+    <!-- Console Appender -->
+    <appender name="ConsoleOutput" class="ch.qos.logback.core.ConsoleAppender">
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <Pattern>%white(%d{ISO8601}) %highlight(%-5level) [%yellow(%t)] : %msg%n%throwable</Pattern>
+        </layout>
+    </appender>
+
+    <!-- Rolling File Appender without size-based indexing -->
+    <appender name="LogFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${LOG_FILE_NAME}.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level : %msg%n</Pattern>
+        </encoder>
+
+        <!-- Time-based rolling policy only -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/archived/${LOG_FILE_NAME}-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Root Logger -->
+    <root level="info">
+        <appender-ref ref="LogFile"/>
+        <appender-ref ref="ConsoleOutput"/>
+    </root>
+
+    <!-- Trace level logging for specific package -->
+    <logger name="com.log" level="trace" additivity="false">
+        <appender-ref ref="LogFile"/>
+        <appender-ref ref="ConsoleOutput"/>
+    </logger>
+
+</configuration>

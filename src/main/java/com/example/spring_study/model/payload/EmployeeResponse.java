@@ -1,25 +1,27 @@
 package com.example.spring_study.model.payload;
 
+import com.example.spring_study.model.Role;
 import com.example.spring_study.validator.ValidPhoneNumber;
 import com.example.spring_study.validator.ValidateRole;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 import java.util.Set;
 
-@Data
+@AllArgsConstructor
 @NoArgsConstructor
-public class EmployeeRequest {
+@Data
+public class EmployeeResponse {
+    @NonNull
+    private int id;
     @NonNull
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String userName;
-    @NonNull
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    private String password;
     @NonNull
     private String fullName;
     @NonNull
@@ -28,8 +30,8 @@ public class EmployeeRequest {
     @ValidPhoneNumber
     private String phoneNumber;
     @NonNull
-    @Min(value = 0, message = "Account ballance cannot be null")
+    @Min(value = 0, message = "Account ballance cannot be negative")
     private Double accountBalance;
     @ValidateRole
-    private Set<String> roles;
+    private Set<Role> roles;
 }

@@ -1,12 +1,18 @@
 package com.example.spring_study.service.impl;
 
+import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
+import com.example.spring_study.exception.BorrowingNotFoundException;
+import com.example.spring_study.exception.DeviceNotFoundException;
+import com.example.spring_study.exception.EmployeeNotFoundException;
+import com.example.spring_study.mapping.BorrowingMapper;
 import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.Employee;
 import com.example.spring_study.model.payload.BaseSearchRequest;
 import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.BorrowingRequest;
+import com.example.spring_study.model.payload.BorrowingResponse;
 import com.example.spring_study.repository.BorrowingRepository;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.repository.EmployeeRepository;
@@ -31,10 +37,13 @@ public class BorrowingServiceImpl implements BorrowingService {
     private EmployeeRepository employeeRepository;
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private BorrowingMapper mapper;
 
     @Override
-    public Borrowing createBorrowing(BorrowingRequest request) {
-        Employee employee = employeeRepository.findById(request.getEmployeeId()).orElse(null);
+    public BorrowingResponse createBorrowing(BorrowingRequest request) {
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+                .orElseThrow(() -> new EmployeeNotFoundException(request.getEmployeeId()));
         if (employee == null) {
             return null;
         }
@@ -42,7 +51,8 @@ public class BorrowingServiceImpl implements BorrowingService {
         List<Device> devices = new ArrayList<>();
 
         for (int deviceId : request.getDevicesId()) {
-            Device device = deviceRepository.findById(deviceId).orElse(null);
+            Device device = deviceRepository.findById(deviceId)
+                    .orElseThrow(() -> new DeviceNotFoundException(deviceId));
             if (device == null) {
                 continue;
             }
@@ -55,12 +65,14 @@ public class BorrowingServiceImpl implements BorrowingService {
         }
 
         Borrowing borrowing = new Borrowing(employee, devices);
-        return borrowingRepository.save(borrowing);
+        BorrowingResponse response = mapper.borrowingToBorrowingResponse(borrowingRepository.save(borrowing));
+        return response;
     }
 
     @Override
-    public Borrowing updateBorrowing(int id, BorrowingRequest request) {
-        Employee employee = employeeRepository.findById(request.getEmployeeId()).orElse(null);
+    public BorrowingResponse updateBorrowing(int id, BorrowingRequest request) {
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+                .orElseThrow(() -> new EmployeeNotFoundException(request.getEmployeeId()));
         if (employee == null) {
             return null;
         }
@@ -68,7 +80,8 @@ public class BorrowingServiceImpl implements BorrowingService {
         List<Device> devices = new ArrayList<>();
 
         for (int deviceId : request.getDevicesId()) {
-            Device device = deviceRepository.findById(deviceId).orElse(null);
+            Device device = deviceRepository.findById(deviceId)
+                    .orElseThrow(() -> new DeviceNotFoundException(deviceId));
             if (device == null) {
                 continue;
             }
@@ -80,7 +93,7 @@ public class BorrowingServiceImpl implements BorrowingService {
             return null;
         }
 
-        Borrowing borrowing = getBorrowingById(id);
+        Borrowing borrowing = borrowingRepository.findById(id).orElseThrow(() -> new BorrowingNotFoundException(id));
         if (borrowing == null) {
             return null;
         }
@@ -90,7 +103,7 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowing.getDateAudit().updateHandOverDate();
         borrowing.updateTotalPrice();
 
-        return borrowingRepository.save(borrowing);
+        return mapper.borrowingToBorrowingResponse(borrowingRepository.save(borrowing));
     }
 
     @Override
@@ -103,76 +116,79 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     @Override
-    public Borrowing getBorrowingById(int id) {
-        return borrowingRepository.findById(id).orElse(null);
+    public BorrowingResponse getBorrowingById(int id) {
+        Borrowing borrowing = borrowingRepository.findById(id).orElseThrow(() -> new BorrowingNotFoundException(id));
+        return mapper.borrowingToBorrowingResponse(borrowing);
     }
 
     @Override
-    public Page<Borrowing> getAllBorrowing(BaseSearchRequest request) {
+    public Page<BorrowingResponse> getAllBorrowing(BaseSearchRequest request) {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
-        return borrowingRepository.findAll(pageable);
+        return mapper.borrowingPageToResponsePage(borrowingRepository.findAll(pageable));
     }
 
     @Override
-    public Page<Borrowing> getBorrowingsSortedBy(BaseSortRequest request) {
+    public Page<BorrowingResponse> getBorrowingsSortedBy(BaseSortRequest request) {
         Sort sort = Sort.by(Sort.Order.asc(request.getSortString()));
-        if (request.getSortDirection() != null) {
-            switch (request.getSortDirection()) {
+        SortParam sortParam = SortParam.valueOf(request.getSortDirection());
+        if (sortParam != null) {
+            switch (sortParam) {
                 case ASC -> sort = Sort.by(Sort.Order.asc(request.getSortString()));
                 case DESC -> sort = Sort.by(Sort.Order.desc(request.getSortString()));
             }
         }
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
-        return borrowingRepository.findAll(pageable);
+        return mapper.borrowingPageToResponsePage(borrowingRepository.findAll(pageable));
     }
 
     @Override
-    public Page<Borrowing> findByDeviceName(String name, BaseSearchRequest request) {
+    public Page<BorrowingResponse> findByDeviceName(String name, BaseSearchRequest request) {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Borrowing> borrowings = borrowingRepository.findByDeviceName(name, pageable);
         if (borrowings.isEmpty()) {
             return null;
         }
 
-        return borrowings;
+        return mapper.borrowingPageToResponsePage(borrowings);
     }
 
     @Override
-    public Page<Borrowing> findByHandOverDate(LocalDateTime startDate, LocalDateTime endDate, BaseSearchRequest request) {
+    public Page<BorrowingResponse> findByHandOverDate(LocalDateTime startDate, LocalDateTime endDate, BaseSearchRequest request) {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Borrowing> borrowings = borrowingRepository.findByDateAudit_HandOverDateBetween(startDate, endDate, pageable);
         if (borrowings.isEmpty()) {
             return null;
         }
 
-        return borrowings;
+        return mapper.borrowingPageToResponsePage(borrowings);
     }
 
     @Override
-    public Page<Borrowing> findByDeviceType(Type type, BaseSearchRequest request) {
+    public Page<BorrowingResponse> findByDeviceType(Type type, BaseSearchRequest request) {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Borrowing> borrowings = borrowingRepository.findByDeviceType(type, pageable);
         if (borrowings.isEmpty()) {
             return null;
         }
 
-        return borrowings;
+        return mapper.borrowingPageToResponsePage(borrowings);
     }
 
     @Override
-    public Page<Borrowing> findByTotalPrice(double totalPrice, BaseSearchRequest request) {
+    public Page<BorrowingResponse> findByTotalPrice(double totalPrice, BaseSearchRequest request) {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Borrowing> borrowings = borrowingRepository.findByTotalPrice(totalPrice, pageable);
         if (borrowings.isEmpty()) {
             return null;
         }
 
-        return borrowings;
+        return mapper.borrowingPageToResponsePage(borrowings);
     }
 
     @Override
-    public List<Borrowing> transferDevice(int borrowingIdFrom, int borrowingIdTo, int deviceId) {
-        Borrowing existingBorrowing = getBorrowingById(borrowingIdFrom);
+    public List<BorrowingResponse> transferDevice(int borrowingIdFrom, int borrowingIdTo, int deviceId) {
+        Borrowing existingBorrowing = borrowingRepository.findById(borrowingIdFrom)
+                .orElseThrow(() -> new BorrowingNotFoundException(borrowingIdFrom));
         if (existingBorrowing == null) {
             return Collections.emptyList();
         }
@@ -185,7 +201,8 @@ public class BorrowingServiceImpl implements BorrowingService {
 
         existingBorrowing.removeDevice(existingDevice);
 
-        Borrowing newBorrowing = getBorrowingById(borrowingIdTo);
+        Borrowing newBorrowing = borrowingRepository.findById(borrowingIdTo)
+                .orElseThrow(() -> new BorrowingNotFoundException(borrowingIdTo));
         if (newBorrowing == null) {
             return Collections.emptyList();
         }
@@ -199,6 +216,6 @@ public class BorrowingServiceImpl implements BorrowingService {
         borrowingRepository.save(existingBorrowing);
         borrowingRepository.save(newBorrowing);
         List<Borrowing> borrowings = List.of(existingBorrowing, newBorrowing);
-        return borrowings;
+        return mapper.borrowingsToResponses(borrowings);
     }
 }

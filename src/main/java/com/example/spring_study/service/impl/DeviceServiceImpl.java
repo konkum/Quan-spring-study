@@ -1,7 +1,9 @@
 package com.example.spring_study.service.impl;
 
 import com.example.spring_study.constant.RateType;
+import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
+import com.example.spring_study.exception.DeviceNotFoundException;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.payload.BaseSearchRequest;
 import com.example.spring_study.model.payload.BaseSortRequest;
@@ -62,7 +64,7 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device getDeviceById(int id) {
-        return deviceRepository.findById(id).orElse(null);
+        return deviceRepository.findById(id).orElseThrow(() -> new DeviceNotFoundException(id));
     }
 
     @Override
@@ -128,8 +130,9 @@ public class DeviceServiceImpl implements DeviceService {
     @Override
     public Page<Device> getDevicesSortedBy(BaseSortRequest request) {
         Sort sort = Sort.by(Sort.Order.asc(request.getSortString()));
-        if (request.getSortDirection() != null) {
-            switch (request.getSortDirection()) {
+        SortParam sortParam = SortParam.valueOf(request.getSortDirection());
+        if (sortParam != null) {
+            switch (sortParam) {
                 case ASC -> sort = Sort.by(Sort.Order.asc(request.getSortString()));
                 case DESC -> sort = Sort.by(Sort.Order.desc(request.getSortString()));
             }

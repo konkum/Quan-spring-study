@@ -2,6 +2,8 @@ package com.example.spring_study.controller;
 
 import com.example.spring_study.model.Employee;
 import com.example.spring_study.model.payload.EmployeeRequest;
+import com.example.spring_study.model.payload.EmployeeResponse;
+import com.example.spring_study.model.payload.EmployeeResponseUpdate;
 import com.example.spring_study.service.EmployeeService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,19 +40,22 @@ public class EmployeeControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Employee employee;
+    private EmployeeResponse employee;
     private EmployeeRequest employeeRequest;
 
     @BeforeEach
-    void setup(){
-        employee = new Employee();
+    void setup() {
+        employee = new EmployeeResponse();
         employee.setId(1);
+        employee.setUserName("Test");
         employee.setAddress("Address 1");
         employee.setPhoneNumber("0123456789");
         employee.setFullName("Name 1");
         employee.setAccountBalance(10000.0);
 
         employeeRequest = new EmployeeRequest();
+        employeeRequest.setUserName("Test");
+        employeeRequest.setPassword("12345");
         employeeRequest.setAddress("Address 1");
         employeeRequest.setPhoneNumber("0123456789");
         employeeRequest.setFullName("Name 1");
@@ -70,27 +75,27 @@ public class EmployeeControllerTests {
                 .andExpect(jsonPath("$.accountBalance").value(10000.0))
                 .andExpect(jsonPath("$.phoneNumber").value("0123456789"));
 
-        verify(employeeService,times(1)).createEmployee(any(EmployeeRequest.class));
+        verify(employeeService, times(1)).createEmployee(any(EmployeeRequest.class));
     }
 
     @Test
-    void testGetEmployeeById() throws Exception{
+    void testGetEmployeeById() throws Exception {
         when(employeeService.getEmployeeById(anyInt())).thenReturn(employee);
 
         mockMvc.perform(get("/api/v1/employee/get")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","1"))
+                        .param("id", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.address").value("Address 1"))
                 .andExpect(jsonPath("$.accountBalance").value(10000.0))
                 .andExpect(jsonPath("$.phoneNumber").value("0123456789"));
 
-        verify(employeeService,times(1)).getEmployeeById(anyInt());
+        verify(employeeService, times(1)).getEmployeeById(anyInt());
     }
 
     @Test
-    void testGetEmployees()throws Exception {
+    void testGetEmployees() throws Exception {
         when(employeeService.getAllEmployees()).thenReturn(List.of(employee));
 
         mockMvc.perform(get("/api/v1/employee/getAll")
@@ -105,25 +110,25 @@ public class EmployeeControllerTests {
     }
 
     @Test
-    void testDeleteEmployee() throws Exception{
+    void testDeleteEmployee() throws Exception {
         doNothing().when(employeeService).deleteEmployee(anyInt());
 
         mockMvc.perform(delete("/api/v1/employee/delete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","1"))
+                        .param("id", "1"))
                 .andExpect(status().isOk());
 
-        verify(employeeService,times(1)).deleteEmployee(anyInt());
+        verify(employeeService, times(1)).deleteEmployee(anyInt());
     }
 
 
     @Test
-    void testUpdateEmployee()throws Exception {
-        when(employeeService.updateEmployee(anyInt(),any(EmployeeRequest.class))).thenReturn(employee);
+    void testUpdateEmployee() throws Exception {
+        when(employeeService.updateEmployee(anyInt(), any(EmployeeRequest.class))).thenReturn((EmployeeResponseUpdate) employee);
 
         mockMvc.perform(put("/api/v1/employee/update")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","1")
+                        .param("id", "1")
                         .content(objectMapper.writeValueAsString(employeeRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -131,7 +136,7 @@ public class EmployeeControllerTests {
                 .andExpect(jsonPath("$.accountBalance").value(10000.0))
                 .andExpect(jsonPath("$.phoneNumber").value("0123456789"));
 
-        verify(employeeService,times(1)).updateEmployee(anyInt(),any(EmployeeRequest.class));
+        verify(employeeService, times(1)).updateEmployee(anyInt(), any(EmployeeRequest.class));
     }
 
     @Test
@@ -143,23 +148,23 @@ public class EmployeeControllerTests {
                         .content(objectMapper.writeValueAsString(employeeRequest)))
                 .andExpect(status().isNotAcceptable());
 
-        verify(employeeService,times(1)).createEmployee(any(EmployeeRequest.class));
+        verify(employeeService, times(1)).createEmployee(any(EmployeeRequest.class));
     }
 
     @Test
-    void testGetEmployeeById_NotFound() throws Exception{
+    void testGetEmployeeById_NotFound() throws Exception {
         when(employeeService.getEmployeeById(anyInt())).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/employee/get")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","999"))
+                        .param("id", "999"))
                 .andExpect(status().isNotFound());
 
-        verify(employeeService,times(1)).getEmployeeById(anyInt());
+        verify(employeeService, times(1)).getEmployeeById(anyInt());
     }
 
     @Test
-    void testGetEmployees_NotFound()throws Exception {
+    void testGetEmployees_NotFound() throws Exception {
         when(employeeService.getAllEmployees()).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/employee/getAll")
@@ -171,15 +176,15 @@ public class EmployeeControllerTests {
 
 
     @Test
-    void testUpdateEmployee_NotAcceptable()throws Exception {
-        when(employeeService.updateEmployee(anyInt(),any(EmployeeRequest.class))).thenReturn(null);
+    void testUpdateEmployee_NotAcceptable() throws Exception {
+        when(employeeService.updateEmployee(anyInt(), any(EmployeeRequest.class))).thenReturn(null);
 
         mockMvc.perform(put("/api/v1/employee/update")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","1")
+                        .param("id", "1")
                         .content(objectMapper.writeValueAsString(employeeRequest)))
                 .andExpect(status().isNotAcceptable());
 
-        verify(employeeService,times(1)).updateEmployee(anyInt(),any(EmployeeRequest.class));
+        verify(employeeService, times(1)).updateEmployee(anyInt(), any(EmployeeRequest.class));
     }
 }

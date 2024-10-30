@@ -1,16 +1,19 @@
 package com.example.spring_study.service;
 
-import com.example.spring_study.model.Device;
-import com.example.spring_study.model.Employee;
-import com.example.spring_study.model.payload.DeviceRequest;
 import com.example.spring_study.model.payload.EmployeeRequest;
+import com.example.spring_study.model.payload.EmployeeResponse;
+import com.example.spring_study.model.payload.EmployeeResponseUpdate;
 
 import java.util.List;
 
 public interface EmployeeService {
-    public Employee createEmployee(EmployeeRequest request);
-    public Employee updateEmployee(int id,EmployeeRequest request);
-    public Employee getEmployeeById(int id);
-    public List<Employee> getAllEmployees();
+    public EmployeeResponse createEmployee(EmployeeRequest request);
+
+    public EmployeeResponseUpdate updateEmployee(int id, EmployeeRequest request);
+
+    public EmployeeResponse getEmployeeById(int id);
+
+    public List<EmployeeResponse> getAllEmployees();
+
     public void deleteEmployee(int id);
 }

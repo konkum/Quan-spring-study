@@ -6,6 +6,7 @@ import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.payload.BaseSearchRequest;
 import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.BorrowingRequest;
+import com.example.spring_study.model.payload.BorrowingResponse;
 import com.example.spring_study.service.BorrowingService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -29,37 +30,33 @@ import static org.springframework.security.authorization.AuthorityAuthorizationM
 public class BorrowingController {
     private BorrowingService borrowingService;
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/get")
-    private ResponseEntity<Borrowing> getBorrowingById(@Param("id") int id) {
-        Borrowing borrowing = borrowingService.getBorrowingById(id);
+    private ResponseEntity<BorrowingResponse> getBorrowingById(@Param("id") int id) {
+        BorrowingResponse borrowing = borrowingService.getBorrowingById(id);
         if (borrowing == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(borrowing);
     }
 
-    @PreAuthorize("hasRole('USER')")
     @GetMapping(path = "/getAll")
-    private ResponseEntity<Page<Borrowing>> getAllBorrowings(@Valid @ModelAttribute BaseSearchRequest request) {
-        Page<Borrowing> borrowings = borrowingService.getAllBorrowing(request);
+    private ResponseEntity<Page<BorrowingResponse>> getAllBorrowings(@Valid @ModelAttribute BaseSearchRequest request) {
+        Page<BorrowingResponse> borrowings = borrowingService.getAllBorrowing(request);
         if (borrowings == null || borrowings.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(borrowings);
     }
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/getBorrowingsSortedBy")
-    private ResponseEntity<Page<Borrowing>> getBorrowingsSortedBy(@Valid @ModelAttribute BaseSortRequest request) {
-        Page<Borrowing> borrowings = borrowingService.getBorrowingsSortedBy(request);
+    private ResponseEntity<Page<BorrowingResponse>> getBorrowingsSortedBy(@Valid @ModelAttribute BaseSortRequest request) {
+        Page<BorrowingResponse> borrowings = borrowingService.getBorrowingsSortedBy(request);
         if (borrowings == null || borrowings.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok().body(borrowings);
     }
 
-    @PreAuthorize(ProjectRole.ADMIN)
     @DeleteMapping(path = "/delete")
     private ResponseEntity deleteBorrowing(@Param("id") int id) {
         boolean canDelete = borrowingService.deleteBorrowing(id);
@@ -69,30 +66,27 @@ public class BorrowingController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize(ProjectRole.ADMIN)
     @PostMapping(path = "/create")
-    private ResponseEntity<Borrowing> createBorrowing(@Valid @RequestBody BorrowingRequest request) {
-        Borrowing borrowing = borrowingService.createBorrowing(request);
+    private ResponseEntity<BorrowingResponse> createBorrowing(@Valid @RequestBody BorrowingRequest request) {
+        BorrowingResponse borrowing = borrowingService.createBorrowing(request);
         if (borrowing == null) {
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
         return ResponseEntity.ok().body(borrowing);
     }
 
-    @PreAuthorize(ProjectRole.ADMIN)
     @PutMapping(path = "/update")
-    private ResponseEntity<Borrowing> updateBorrowing(@Param("id") int id, @Valid @RequestBody BorrowingRequest request) {
-        Borrowing borrowing = borrowingService.updateBorrowing(id, request);
+    private ResponseEntity<BorrowingResponse> updateBorrowing(@Param("id") int id, @Valid @RequestBody BorrowingRequest request) {
+        BorrowingResponse borrowing = borrowingService.updateBorrowing(id, request);
         if (borrowing == null) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok().body(borrowing);
     }
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/findByItemName")
-    private ResponseEntity<Page<Borrowing>> findByItemName(@Param("itemName") String itemName, @Valid @ModelAttribute BaseSearchRequest pageable) {
-        Page<Borrowing> borrowings = borrowingService.findByDeviceName(itemName, pageable);
+    private ResponseEntity<Page<BorrowingResponse>> findByItemName(@Param("itemName") String itemName, @Valid @ModelAttribute BaseSearchRequest pageable) {
+        Page<BorrowingResponse> borrowings = borrowingService.findByDeviceName(itemName, pageable);
         if (borrowings.isEmpty() || borrowings == null) {
             return ResponseEntity.notFound().build();
         }
@@ -100,12 +94,11 @@ public class BorrowingController {
         return ResponseEntity.ok(borrowings);
     }
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/findByHandOverDate")
-    private ResponseEntity<Page<Borrowing>> findByHandOverDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
-                                                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate,
-                                                               @Valid @ModelAttribute BaseSearchRequest pageable) {
-        Page<Borrowing> borrowings = borrowingService.findByHandOverDate(startDate, endDate, pageable);
+    private ResponseEntity<Page<BorrowingResponse>> findByHandOverDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime startDate,
+                                                                       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime endDate,
+                                                                       @Valid @ModelAttribute BaseSearchRequest pageable) {
+        Page<BorrowingResponse> borrowings = borrowingService.findByHandOverDate(startDate, endDate, pageable);
         if (borrowings.isEmpty() || borrowings == null) {
             return ResponseEntity.notFound().build();
         }
@@ -113,10 +106,9 @@ public class BorrowingController {
         return ResponseEntity.ok(borrowings);
     }
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/findByItemType")
-    private ResponseEntity<Page<Borrowing>> findByItemType(@Param("type") Type type, @Valid @ModelAttribute BaseSearchRequest pageable) {
-        Page<Borrowing> borrowings = borrowingService.findByDeviceType(type, pageable);
+    private ResponseEntity<Page<BorrowingResponse>> findByItemType(@Param("type") Type type, @Valid @ModelAttribute BaseSearchRequest pageable) {
+        Page<BorrowingResponse> borrowings = borrowingService.findByDeviceType(type, pageable);
         if (borrowings.isEmpty() || borrowings == null) {
             return ResponseEntity.notFound().build();
         }
@@ -124,10 +116,9 @@ public class BorrowingController {
         return ResponseEntity.ok(borrowings);
     }
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/findByTotalPrice")
-    private ResponseEntity<Page<Borrowing>> findByTotalPrice(@Param("totalPrice") double totalPrice, @Valid @ModelAttribute BaseSearchRequest pageable) {
-        Page<Borrowing> borrowings = borrowingService.findByTotalPrice(totalPrice, pageable);
+    private ResponseEntity<Page<BorrowingResponse>> findByTotalPrice(@Param("totalPrice") double totalPrice, @Valid @ModelAttribute BaseSearchRequest pageable) {
+        Page<BorrowingResponse> borrowings = borrowingService.findByTotalPrice(totalPrice, pageable);
         if (borrowings.isEmpty() || borrowings == null) {
             return ResponseEntity.notFound().build();
         }
@@ -135,12 +126,11 @@ public class BorrowingController {
         return ResponseEntity.ok(borrowings);
     }
 
-    @PreAuthorize(ProjectRole.USER)
     @GetMapping(path = "/transferDevice")
-    private ResponseEntity<List<Borrowing>> transferDevice(@Param("borrowingIdFrom") int borrowingIdFrom,
-                                                           @Param("borrowingIdTo") int borrowingIdTo,
-                                                           @Param("deviceId") int deviceId) {
-        List<Borrowing> borrowings = borrowingService.transferDevice(borrowingIdFrom, borrowingIdTo, deviceId);
+    private ResponseEntity<List<BorrowingResponse>> transferDevice(@Param("borrowingIdFrom") int borrowingIdFrom,
+                                                                   @Param("borrowingIdTo") int borrowingIdTo,
+                                                                   @Param("deviceId") int deviceId) {
+        List<BorrowingResponse> borrowings = borrowingService.transferDevice(borrowingIdFrom, borrowingIdTo, deviceId);
         if (borrowings.isEmpty() || borrowings == null) {
             return ResponseEntity.notFound().build();
         }

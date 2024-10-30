@@ -2,13 +2,8 @@ package com.example.spring_study.controller;
 
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.Type;
-import com.example.spring_study.model.Borrowing;
-import com.example.spring_study.model.DateAudit;
-import com.example.spring_study.model.Device;
-import com.example.spring_study.model.Employee;
-import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
-import com.example.spring_study.model.payload.BorrowingRequest;
+import com.example.spring_study.model.*;
+import com.example.spring_study.model.payload.*;
 import com.example.spring_study.service.BorrowingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 
 @WebMvcTest(BorrowingController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -54,8 +50,8 @@ public class BorrowingControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private Borrowing borrowing;
-    private Borrowing borrowing2;
+    private BorrowingResponse borrowing;
+    private BorrowingResponse borrowing2;
     private BorrowingRequest borrowingRequest;
     private DateAudit dateAudit;
     private Device device1;
@@ -93,26 +89,22 @@ public class BorrowingControllerTests {
         device2.setOriginalPrice(170.0);
         device2.setDateAudit(dateAudit);
 
-        Employee employee = new Employee( "John Doe", "123 Street", "123456789", 1000.0);
-        employee.setId(1);
-        
+        EmployeeResponse employee = new EmployeeResponse(1, "Test UserName", "John Doe", "123 Street", "123456789", 1000.0, Set.of(new Role(1, "ROLE_ADMIN")));
+
         borrowingRequest = new BorrowingRequest();
         borrowingRequest.setEmployeeId(employee.getId());
         borrowingRequest.setDevicesId(List.of(1, 2));
 
-        borrowing = new Borrowing(employee, List.of(device1,device2));
-        borrowing.setId(1);
-        borrowing.setDateAudit(dateAudit);
+        borrowing = new BorrowingResponse(1, dateAudit, employee, List.of(device1, device2));
         borrowing.getDateAudit().setHandOverDate(LocalDateTime.now(fixedClock).truncatedTo(ChronoUnit.MICROS));
 
 
-        Employee employee2 = new Employee( "Test Doe", "123 Street", "123456789", 1000.0);
-        employee2.setId(2);
+        EmployeeResponse employee2 = new EmployeeResponse(2, "Test UserName 2", "Test Doe", "123 Street", "123456789", 1000.0, Set.of(new Role(1, "ROLE_USER")));
         DateAudit dateAudit1;
         dateAudit1 = new DateAudit();
         dateAudit1.setCreatedAt(LocalDateTime.now(fixedClock));
 
-        borrowing2 = new Borrowing(employee2, List.of(device1));
+        borrowing2 = new BorrowingResponse(2, dateAudit1, employee2, List.of(device1));
         borrowing2.setId(2);
         borrowing2.setDateAudit(dateAudit1);
         borrowing2.getDateAudit().setHandOverDate(LocalDateTime.now(fixedClock).minusDays(3).truncatedTo(ChronoUnit.MICROS));
@@ -129,7 +121,7 @@ public class BorrowingControllerTests {
                 .andExpect(jsonPath("$.id").value(borrowing.getId()))
                 .andExpect(jsonPath("$.totalPrice").value(borrowing.getTotalPrice()))
                 .andExpect(jsonPath("$.employee").value(borrowing.getEmployee()))
-                .andExpect(jsonPath("$.devices",hasSize(2)));
+                .andExpect(jsonPath("$.devices", hasSize(2)));
 
         verify(borrowingService, times(1)).createBorrowing(any(BorrowingRequest.class));
     }
@@ -139,26 +131,26 @@ public class BorrowingControllerTests {
         when(borrowingService.getBorrowingById(1)).thenReturn(borrowing);
 
         mockMvc.perform(get("/api/v1/borrowing/get")
-                        .param("id","1"))
+                        .param("id", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(borrowing.getId()))
                 .andExpect(jsonPath("$.totalPrice").value(borrowing.getTotalPrice()))
                 .andExpect(jsonPath("$.employee").value(borrowing.getEmployee()))
-                .andExpect(jsonPath("$.devices",hasSize(2)));
+                .andExpect(jsonPath("$.devices", hasSize(2)));
 
         verify(borrowingService, times(1)).getBorrowingById(anyInt());
     }
 
     @Test
     void testGetAllBorrowings() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.getAllBorrowing(any(BaseSearchRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/getAll")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)));
+                .andExpect(jsonPath("$.content", hasSize(1)));
 
         verify(borrowingService, times(1)).getAllBorrowing(any(BaseSearchRequest.class));
     }
@@ -168,7 +160,7 @@ public class BorrowingControllerTests {
         when(borrowingService.deleteBorrowing(1)).thenReturn(true);
 
         mockMvc.perform(delete("/api/v1/borrowing/delete")
-                        .param("id","1"))
+                        .param("id", "1"))
                 .andExpect(status().isOk());
 
         verify(borrowingService, times(1)).deleteBorrowing(1);
@@ -176,34 +168,34 @@ public class BorrowingControllerTests {
 
     @Test
     void testGetAllBorrowingsSortedByTotalPrice() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing2,borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing2, borrowing);
         when(borrowingService.getBorrowingsSortedBy(any(BaseSortRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/getBorrowingsSortedBy")
-                        .param("pageNumber","0")
-                        .param("pageSize","10")
-                        .param("sortString","totalPrice")
-                        .param("sortDirection","ASC"))
-                        .andExpect(status().isOk())
-                        .andExpect(jsonPath("$.content",hasSize(2)))
-                        .andExpect(jsonPath("$.content[0].totalPrice").value(borrowing2.getTotalPrice()))
-                        .andExpect(jsonPath("$.content[1].totalPrice").value(borrowing.getTotalPrice()));
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10")
+                        .param("sortString", "totalPrice")
+                        .param("sortDirection", "ASC"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].totalPrice").value(borrowing2.getTotalPrice()))
+                .andExpect(jsonPath("$.content[1].totalPrice").value(borrowing.getTotalPrice()));
 
         verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BaseSortRequest.class));
     }
 
     @Test
     void testGetAllBorrowingsSortedByHandOverDate() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing2,borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing2, borrowing);
         when(borrowingService.getBorrowingsSortedBy(any(BaseSortRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/getBorrowingsSortedBy")
-                        .param("pageNumber","0")
-                        .param("pageSize","10")
-                        .param("sortString","dateAudit.handOverDate")
-                        .param("sortDirection","ASC"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10")
+                        .param("sortString", "dateAudit.handOverDate")
+                        .param("sortDirection", "ASC"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(2)))
+                .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].dateAudit.handOverDate").value(borrowing2.getDateAudit().getHandOverDate().toString()))
                 .andExpect(jsonPath("$.content[1].dateAudit.handOverDate").value(borrowing.getDateAudit().getHandOverDate().toString()));
 
@@ -212,84 +204,84 @@ public class BorrowingControllerTests {
 
     @Test
     void testSearchBorrowingsByHandOverDate() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByHandOverDate(any(LocalDateTime.class), any(LocalDateTime.class), any(BaseSearchRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/findByHandOverDate")
                         .param("startDate", LocalDateTime.now(fixedClock).minusDays(1).toString())
                         .param("endDate", LocalDateTime.now(fixedClock).plusDays(1).toString())
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].dateAudit.handOverDate").value(borrowing.getDateAudit().getHandOverDate().toString()));
 
-        verify(borrowingService, times(1)).findByHandOverDate(any(LocalDateTime.class), any(LocalDateTime.class),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByHandOverDate(any(LocalDateTime.class), any(LocalDateTime.class), any(BaseSearchRequest.class));
     }
 
     @Test
     void testSearchBorrowingsByDeviceName() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByDeviceName(anyString(), any(BaseSearchRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/findByItemName")
                         .param("itemName", "Item 1")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].devices[0].itemName").value("Item 1"));
 
-        verify(borrowingService, times(1)).findByDeviceName(anyString(),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByDeviceName(anyString(), any(BaseSearchRequest.class));
     }
 
     @Test
     void testSearchBorrowingsByDeviceType() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByDeviceType(any(Type.class), any(BaseSearchRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/findByItemType")
                         .param("type", "MOUSE")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].devices[0].type").value("MOUSE"));
 
-        verify(borrowingService, times(1)).findByDeviceType(any(Type.class),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByDeviceType(any(Type.class), any(BaseSearchRequest.class));
     }
 
     @Test
     void testSearchBorrowingsByTotalPrice() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByTotalPrice(anyDouble(), any(BaseSearchRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/findByTotalPrice")
                         .param("totalPrice", "290")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].totalPrice").value(290));
 
-        verify(borrowingService, times(1)).findByTotalPrice(anyDouble(),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByTotalPrice(anyDouble(), any(BaseSearchRequest.class));
     }
 
     @Test
     void testTransferDevice() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing,borrowing2);
-        when(borrowingService.transferDevice(anyInt(),anyInt(),anyInt())).thenReturn(borrowings);
+        List<BorrowingResponse> borrowings = List.of(borrowing, borrowing2);
+        when(borrowingService.transferDevice(anyInt(), anyInt(), anyInt())).thenReturn(borrowings);
 
         mockMvc.perform(get("/api/v1/borrowing/transferDevice")
                         .param("borrowingIdFrom", "1")
-                        .param("borrowingIdTo","2")
-                        .param("deviceId","1"))
+                        .param("borrowingIdTo", "2")
+                        .param("deviceId", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2))
                 .andExpect(jsonPath("$[1].devices[0].id").value(1));
 
-        verify(borrowingService, times(1)).transferDevice(anyInt(),anyInt(),anyInt());
+        verify(borrowingService, times(1)).transferDevice(anyInt(), anyInt(), anyInt());
     }
 
     @Test
@@ -309,7 +301,7 @@ public class BorrowingControllerTests {
         when(borrowingService.getBorrowingById(999)).thenReturn(null);
 
         mockMvc.perform(get("/api/v1/borrowing/get")
-                        .param("id","999"))
+                        .param("id", "999"))
                 .andExpect(status().isNotFound());
 
         verify(borrowingService, times(1)).getBorrowingById(anyInt());
@@ -317,12 +309,12 @@ public class BorrowingControllerTests {
 
     @Test
     void testGetAllBorrowings_NotFound() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.getAllBorrowing(any(BaseSearchRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/getAll")
-                        .param("pageNumber","0")
-                        .param("pageSize","0"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "0"))
                 .andExpect(status().isNotFound());
 
         verify(borrowingService, times(1)).getAllBorrowing(any(BaseSearchRequest.class));
@@ -333,7 +325,7 @@ public class BorrowingControllerTests {
         when(borrowingService.deleteBorrowing(999)).thenReturn(false);
 
         mockMvc.perform(delete("/api/v1/borrowing/delete")
-                        .param("id","999"))
+                        .param("id", "999"))
                 .andExpect(status().isNotFound());
 
         verify(borrowingService, times(1)).deleteBorrowing(999);
@@ -341,14 +333,14 @@ public class BorrowingControllerTests {
 
     @Test
     void testGetAllBorrowingsSortedByTotalPrice_NotFound() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing2,borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing2, borrowing);
         when(borrowingService.getBorrowingsSortedBy(any(BaseSortRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/getBorrowingsSortedBy")
-                        .param("pageNumber","0")
-                        .param("pageSize","0")
-                        .param("sortString","totalPrice")
-                        .param("sortDirection","ASC"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "0")
+                        .param("sortString", "totalPrice")
+                        .param("sortDirection", "ASC"))
                 .andExpect(status().isNotFound());
 
         verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BaseSortRequest.class));
@@ -356,45 +348,45 @@ public class BorrowingControllerTests {
 
     @Test
     void testSearchBorrowingsByHandOverDate_NotFound() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByHandOverDate(any(LocalDateTime.class), any(LocalDateTime.class), any(BaseSearchRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/findByHandOverDate")
                         .param("startDate", LocalDateTime.now(fixedClock).plusDays(1).toString())
                         .param("endDate", LocalDateTime.now(fixedClock).plusDays(2).toString())
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(borrowingService, times(1)).findByHandOverDate(any(LocalDateTime.class), any(LocalDateTime.class),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByHandOverDate(any(LocalDateTime.class), any(LocalDateTime.class), any(BaseSearchRequest.class));
     }
 
     @Test
     void testSearchBorrowingsByDeviceName_NotFound() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByDeviceName(anyString(), any(BaseSearchRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/findByItemName")
                         .param("itemName", "Item 3")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(borrowingService, times(1)).findByDeviceName(anyString(),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByDeviceName(anyString(), any(BaseSearchRequest.class));
     }
 
     @Test
     void testSearchBorrowingsByDeviceType_NotFound() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByDeviceType(any(Type.class), any(BaseSearchRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/findByItemType")
                         .param("type", "MOUSE")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(borrowingService, times(1)).findByDeviceType(any(Type.class),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByDeviceType(any(Type.class), any(BaseSearchRequest.class));
     }
 
     @Test
@@ -402,25 +394,25 @@ public class BorrowingControllerTests {
 
         mockMvc.perform(get("/api/v1/borrowing/findByItemType")
                         .param("type", "TEST")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isBadRequest());
 
-        verify(borrowingService, never()).findByDeviceType(any(Type.class),any(BaseSearchRequest.class));
+        verify(borrowingService, never()).findByDeviceType(any(Type.class), any(BaseSearchRequest.class));
     }
 
     @Test
     void testSearchBorrowingsByTotalPrice_NotFound() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing);
+        List<BorrowingResponse> borrowings = List.of(borrowing);
         when(borrowingService.findByTotalPrice(anyDouble(), any(BaseSearchRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/findByTotalPrice")
                         .param("totalPrice", "290")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(borrowingService, times(1)).findByTotalPrice(anyDouble(),any(BaseSearchRequest.class));
+        verify(borrowingService, times(1)).findByTotalPrice(anyDouble(), any(BaseSearchRequest.class));
     }
 
     @Test
@@ -428,24 +420,24 @@ public class BorrowingControllerTests {
 
         mockMvc.perform(get("/api/v1/borrowing/findByTotalPrice")
                         .param("totalPrice", "TEST")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isBadRequest());
 
-        verify(borrowingService, never()).findByTotalPrice(anyDouble(),any(BaseSearchRequest.class));
+        verify(borrowingService, never()).findByTotalPrice(anyDouble(), any(BaseSearchRequest.class));
     }
 
     @Test
     void testTransferDevice_NotFoundBorrowingOrDevice() throws Exception {
-        List<Borrowing> borrowings = List.of(borrowing,borrowing2);
-        when(borrowingService.transferDevice(anyInt(),anyInt(),anyInt())).thenReturn(List.of());
+        List<BorrowingResponse> borrowings = List.of(borrowing, borrowing2);
+        when(borrowingService.transferDevice(anyInt(), anyInt(), anyInt())).thenReturn(List.of());
 
         mockMvc.perform(get("/api/v1/borrowing/transferDevice")
                         .param("borrowingIdFrom", "1")
-                        .param("borrowingIdTo","2")
-                        .param("deviceId","1"))
+                        .param("borrowingIdTo", "2")
+                        .param("deviceId", "1"))
                 .andExpect(status().isNotFound());
 
-        verify(borrowingService, times(1)).transferDevice(anyInt(),anyInt(),anyInt());
+        verify(borrowingService, times(1)).transferDevice(anyInt(), anyInt(), anyInt());
     }
 }

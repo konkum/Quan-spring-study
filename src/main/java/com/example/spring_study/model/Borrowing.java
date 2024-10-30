@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.List;
 
@@ -12,16 +13,20 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Table(name = "borrowing")
+@EntityListeners(AuditingEntityListener.class)
 public class Borrowing {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    @Embedded
     private DateAudit dateAudit;
     @NonNull
     @Min(value = 0, message = "Total Price have to be a non negative number")
     private Double totalPrice;
+    @NonNull
     @OneToOne
     private Employee employee;
+    @NonNull
     @OneToMany
     private List<Device> devices;
 

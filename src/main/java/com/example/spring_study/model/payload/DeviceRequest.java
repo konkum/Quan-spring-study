@@ -12,20 +12,20 @@ import lombok.NonNull;
 @Data
 @NoArgsConstructor
 public class DeviceRequest {
-    @NotNull
+    @NonNull
     @ValueOfEnum(enumClass = Type.class)
     private String type;
     @NonNull
     @Min(value = 0, message = "Unit price must be non-negative")
     private Double unitPrice;
-    @NotNull
+    @NonNull
     @ValueOfEnum(enumClass = RateType.class)
     private String rateType;
-    @NotNull
+    @NonNull
     private String branchName;
-    @NotNull
+    @NonNull
     private String itemName;
-    @NotNull
+    @NonNull
     private String version;
     @NonNull
     @Min(value = 0, message = "Original price must be non-negative")
