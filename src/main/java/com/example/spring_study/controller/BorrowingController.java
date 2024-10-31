@@ -10,6 +10,9 @@ import com.example.spring_study.model.payload.BorrowingResponse;
 import com.example.spring_study.service.BorrowingService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
@@ -24,10 +27,10 @@ import java.util.List;
 
 import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasRole;
 
-@AllArgsConstructor
 @RestController
 @RequestMapping(path = "api/v1/borrowing")
 public class BorrowingController {
+    @Autowired
     private BorrowingService borrowingService;
 
     @GetMapping(path = "/get")
@@ -36,6 +39,7 @@ public class BorrowingController {
         if (borrowing == null) {
             return ResponseEntity.notFound().build();
         }
+
         return ResponseEntity.ok().body(borrowing);
     }
 

@@ -1,4 +1,5 @@
 package com.example.spring_study.service;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -159,7 +160,7 @@ public class DeviceServiceTests {
         deviceService.deleteDevice(1);
 
         // Assert
-        verify(deviceRepository,times(1)).existsById(anyInt());
+        verify(deviceRepository, times(1)).existsById(anyInt());
         verify(deviceRepository, times(1)).deleteById(anyInt());
     }
 
@@ -169,9 +170,9 @@ public class DeviceServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("originalPrice");
-        baseSearchRequest.setSortDirection(SortParam.ASC);
-        Pageable pageable = PageRequest.of(baseSearchRequest.getPageNumber(),baseSearchRequest.getPageSize(),Sort.by(baseSearchRequest.getSortString()));
-        Page<Device> page = new PageImpl<>(List.of(device,device2));
+        baseSearchRequest.setSortDirection("ASC");
+        Pageable pageable = PageRequest.of(baseSearchRequest.getPageNumber(), baseSearchRequest.getPageSize(), Sort.by(baseSearchRequest.getSortString()));
+        Page<Device> page = new PageImpl<>(List.of(device, device2));
 
         when(deviceRepository.findAll(pageable)).thenReturn(page);
 
@@ -181,8 +182,8 @@ public class DeviceServiceTests {
         // Assert
         assertNotNull(devices);
         assertEquals(2, devices.getTotalElements());
-        assertEquals(150.0,devices.getContent().get(0).getOriginalPrice());
-        assertEquals(170.0,devices.getContent().get(1).getOriginalPrice());
+        assertEquals(150.0, devices.getContent().get(0).getOriginalPrice());
+        assertEquals(170.0, devices.getContent().get(1).getOriginalPrice());
         verify(deviceRepository, times(1)).findAll(any(Pageable.class));
     }
 
@@ -192,9 +193,9 @@ public class DeviceServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("dateAudit.createdAt");
-        baseSearchRequest.setSortDirection(SortParam.ASC);
-        Pageable pageable = PageRequest.of(baseSearchRequest.getPageNumber(),baseSearchRequest.getPageSize(),Sort.by(baseSearchRequest.getSortString()));
-        Page<Device> page = new PageImpl<>(List.of(device,device2));
+        baseSearchRequest.setSortDirection("ASC");
+        Pageable pageable = PageRequest.of(baseSearchRequest.getPageNumber(), baseSearchRequest.getPageSize(), Sort.by(baseSearchRequest.getSortString()));
+        Page<Device> page = new PageImpl<>(List.of(device, device2));
 
         when(deviceRepository.findAll(pageable)).thenReturn(page);
 
@@ -204,8 +205,8 @@ public class DeviceServiceTests {
         // Assert
         assertNotNull(devices);
         assertEquals(2, devices.getTotalElements());
-        assertEquals(LocalDateTime.now(fixedClock).minusDays(1),devices.getContent().get(0).getDateAudit().getCreatedAt());
-        assertEquals(LocalDateTime.now(fixedClock),devices.getContent().get(1).getDateAudit().getCreatedAt());
+        assertEquals(LocalDateTime.now(fixedClock).minusDays(1), devices.getContent().get(0).getDateAudit().getCreatedAt());
+        assertEquals(LocalDateTime.now(fixedClock), devices.getContent().get(1).getDateAudit().getCreatedAt());
         verify(deviceRepository, times(1)).findAll(any(Pageable.class));
     }
 
@@ -243,16 +244,16 @@ public class DeviceServiceTests {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Device> page = new PageImpl<>(List.of(device));
 
-        when(deviceRepository.findByDateAudit_CreatedAtBetween(startDate,endDate, pageable)).thenReturn(page);
+        when(deviceRepository.findByDateAudit_CreatedAtBetween(startDate, endDate, pageable)).thenReturn(page);
 
         // Act
-        Page<Device> devices = deviceService.findDeviceByDate(startDate,endDate, baseSearchRequest);
+        Page<Device> devices = deviceService.findDeviceByDate(startDate, endDate, baseSearchRequest);
 
         // Assert
         assertNotNull(devices);
         assertEquals(1, devices.getTotalElements());
-        assertEquals(createdAt,devices.getContent().get(0).getDateAudit().getCreatedAt());
-        verify(deviceRepository, times(1)).findByDateAudit_CreatedAtBetween(any(LocalDateTime.class),any(LocalDateTime.class), any(Pageable.class));
+        assertEquals(createdAt, devices.getContent().get(0).getDateAudit().getCreatedAt());
+        verify(deviceRepository, times(1)).findByDateAudit_CreatedAtBetween(any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
     }
 
     @Test
@@ -273,7 +274,7 @@ public class DeviceServiceTests {
         // Assert
         assertNotNull(devices);
         assertEquals(1, devices.getTotalElements());
-        assertEquals(Type.MOUSE,devices.getContent().get(0).getType());
+        assertEquals(Type.MOUSE, devices.getContent().get(0).getType());
         verify(deviceRepository, times(1)).findByType(any(Type.class), any(Pageable.class));
     }
 
@@ -295,7 +296,7 @@ public class DeviceServiceTests {
         // Assert
         assertNotNull(devices);
         assertEquals(1, devices.getTotalElements());
-        assertEquals(RateType.LIKENEW,devices.getContent().get(0).getRateType());
+        assertEquals(RateType.LIKENEW, devices.getContent().get(0).getRateType());
         verify(deviceRepository, times(1)).findByRateType(any(RateType.class), any(Pageable.class));
     }
 
@@ -377,7 +378,7 @@ public class DeviceServiceTests {
         deviceService.deleteDevice(1);
 
         // Assert
-        verify(deviceRepository,times(1)).existsById(anyInt());
+        verify(deviceRepository, times(1)).existsById(anyInt());
         verify(deviceRepository, never()).deleteById(anyInt());
     }
 
@@ -387,9 +388,9 @@ public class DeviceServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("originalPrice");
-        baseSearchRequest.setSortDirection(SortParam.ASC);
-        Pageable pageable = PageRequest.of(baseSearchRequest.getPageNumber(),baseSearchRequest.getPageSize(),Sort.by(baseSearchRequest.getSortString()));
-        Page<Device> page = new PageImpl<>(List.of(device,device2));
+        baseSearchRequest.setSortDirection("ASC");
+        Pageable pageable = PageRequest.of(baseSearchRequest.getPageNumber(), baseSearchRequest.getPageSize(), Sort.by(baseSearchRequest.getSortString()));
+        Page<Device> page = new PageImpl<>(List.of(device, device2));
 
         when(deviceRepository.findAll(pageable)).thenReturn(Page.empty());
 
@@ -397,7 +398,7 @@ public class DeviceServiceTests {
         Page<Device> devices = deviceService.getDevicesSortedBy(baseSearchRequest);
 
         // Assert
-        assertEquals(0,devices.getTotalElements());
+        assertEquals(0, devices.getTotalElements());
         verify(deviceRepository, times(1)).findAll(any(Pageable.class));
     }
 
@@ -433,14 +434,14 @@ public class DeviceServiceTests {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Device> page = new PageImpl<>(List.of(device));
 
-        when(deviceRepository.findByDateAudit_CreatedAtBetween(startDate,endDate, pageable)).thenReturn(Page.empty());
+        when(deviceRepository.findByDateAudit_CreatedAtBetween(startDate, endDate, pageable)).thenReturn(Page.empty());
 
         // Act
-        Page<Device> devices = deviceService.findDeviceByDate(startDate,endDate, baseSearchRequest);
+        Page<Device> devices = deviceService.findDeviceByDate(startDate, endDate, baseSearchRequest);
 
         // Assert
         assertNull(devices);
-        verify(deviceRepository, times(1)).findByDateAudit_CreatedAtBetween(any(LocalDateTime.class),any(LocalDateTime.class), any(Pageable.class));
+        verify(deviceRepository, times(1)).findByDateAudit_CreatedAtBetween(any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class));
     }
 
     @Test

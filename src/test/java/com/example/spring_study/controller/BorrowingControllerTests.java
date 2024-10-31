@@ -1,10 +1,12 @@
 package com.example.spring_study.controller;
 
+import com.example.spring_study.config.JwtTokenProvider;
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.Type;
 import com.example.spring_study.model.*;
 import com.example.spring_study.model.payload.*;
 import com.example.spring_study.service.BorrowingService;
+import com.example.spring_study.util.WithMockJwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,19 +15,23 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,7 +44,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 
-@WebMvcTest(BorrowingController.class)
+@SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 public class BorrowingControllerTests {
     @Autowired
@@ -111,6 +117,7 @@ public class BorrowingControllerTests {
     }
 
     @Test
+    @WithMockJwt(username = "John", roles = {"ROLE_ADMIN"})
     void testCreateBorrowing() throws Exception {
         when(borrowingService.createBorrowing(any(BorrowingRequest.class))).thenReturn(borrowing);
 

@@ -3,6 +3,7 @@ package com.example.spring_study.service;
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
+import com.example.spring_study.mapping.BorrowingMapper;
 import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.DateAudit;
 import com.example.spring_study.model.Device;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
 
 import java.time.Clock;
@@ -33,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 public class BorrowingServiceTests {
     @Mock
     private BorrowingRepository borrowingRepository;
@@ -43,6 +45,9 @@ public class BorrowingServiceTests {
 
     @Mock
     private EmployeeRepository employeeRepository;
+
+    @MockBean
+    private BorrowingMapper mapper;
 
     @InjectMocks
     private BorrowingServiceImpl borrowingService;
@@ -193,7 +198,7 @@ public class BorrowingServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("totalPrice");
-        baseSearchRequest.setSortDirection(SortParam.ASC);
+        baseSearchRequest.setSortDirection("ASC");
         Pageable pageable = PageRequest.of(0, 10, Sort.by("totalPrice").ascending());
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing2, borrowing));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(page);
@@ -215,7 +220,7 @@ public class BorrowingServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("dateAudit.handOverDate");
-        baseSearchRequest.setSortDirection(SortParam.ASC);
+        baseSearchRequest.setSortDirection("ASC");
         Pageable pageable = PageRequest.of(0, 10, Sort.by("dateAudit.handOverDate").ascending());
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing2, borrowing));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(page);
@@ -409,7 +414,7 @@ public class BorrowingServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("totalPrice");
-        baseSearchRequest.setSortDirection(SortParam.ASC);
+        baseSearchRequest.setSortDirection("ASC");
         Pageable pageable = PageRequest.of(0, 10, Sort.by("totalPrice").ascending());
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing2, borrowing));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());

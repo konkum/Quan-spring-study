@@ -10,6 +10,7 @@ import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.DeviceRequest;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.service.DeviceService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class DeviceServiceImpl implements DeviceService {
     @Autowired
     private DeviceRepository deviceRepository;
@@ -32,7 +34,7 @@ public class DeviceServiceImpl implements DeviceService {
             Device response = new Device(type, request.getUnitPrice(), rateType, request.getBranchName(), request.getItemName(), request.getVersion(), request.getOriginalPrice());
             return deviceRepository.save(response);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error: {}", e.getMessage());
         }
 
         return null;
@@ -56,7 +58,7 @@ public class DeviceServiceImpl implements DeviceService {
 
             return deviceRepository.save(device);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error: {}", e.getMessage());
         }
 
         return null;
@@ -64,12 +66,16 @@ public class DeviceServiceImpl implements DeviceService {
 
     @Override
     public Device getDeviceById(int id) {
-        return deviceRepository.findById(id).orElseThrow(() -> new DeviceNotFoundException(id));
+        return deviceRepository.findById(id).orElseThrow(() -> {
+            log.error("Device not found with id: {}", id);
+            return new DeviceNotFoundException(id);
+        });
     }
 
     @Override
     public boolean deleteDevice(int id) {
         if (!deviceRepository.existsById(id)) {
+            log.error("Device not found with id: {}", id);
             return false;
         }
         deviceRepository.deleteById(id);
@@ -88,6 +94,7 @@ public class DeviceServiceImpl implements DeviceService {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Device> devices = deviceRepository.findByItemName(name, pageable);
         if (devices.isEmpty()) {
+            log.error("Cannot find device with the name or the device you looking for does not exist");
             return null;
         }
 
@@ -99,6 +106,7 @@ public class DeviceServiceImpl implements DeviceService {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Device> devices = deviceRepository.findByDateAudit_CreatedAtBetween(startDate, endDate, pageable);
         if (devices.isEmpty()) {
+            log.error("Cannot find device with the date or the device you looking for does not exist");
             return null;
         }
 
@@ -110,6 +118,7 @@ public class DeviceServiceImpl implements DeviceService {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Device> devices = deviceRepository.findByType(type, pageable);
         if (devices.isEmpty()) {
+            log.error("Cannot find device with the type or the device you looking for does not exist");
             return null;
         }
 
@@ -121,6 +130,7 @@ public class DeviceServiceImpl implements DeviceService {
         Pageable pageable = PageRequest.of(request.getPageNumber(), request.getPageSize());
         Page<Device> devices = deviceRepository.findByRateType(rateType, pageable);
         if (devices.isEmpty()) {
+            log.error("Cannot find device with the rate type or the device you looking for does not exist");
             return null;
         }
 

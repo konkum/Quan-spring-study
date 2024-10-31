@@ -11,6 +11,7 @@ import com.example.spring_study.repository.EmployeeRepository;
 import com.example.spring_study.repository.RoleRepository;
 import com.example.spring_study.service.EmployeeService;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
     @Autowired
     private RoleRepository roleRepository;
@@ -45,7 +47,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeResponseUpdate updateEmployee(int id, EmployeeRequest request) {
         try {
-            Employee employee = employeeRepository.findById(id).orElseThrow(() -> new EmployeeNotFoundException(id));
+            Employee employee = employeeRepository.findById(id).orElseThrow(() -> {
+                log.error("Employee not found with id: {}", id);
+                return new EmployeeNotFoundException(id);
+            });
 
             Set<Role> roles = roleRepository.findByNameIn(request.getRoles());
             employee.setUserName(request.getUserName());
@@ -69,7 +74,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeResponse getEmployeeById(int id) {
         Employee employee = employeeRepository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> {
+                    log.error("Employee not found with id: {}", id);
+                    return new EmployeeNotFoundException(id);
+                });
         return mapper.toResponse(employee);
     }
 
