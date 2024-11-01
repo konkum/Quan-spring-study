@@ -34,7 +34,7 @@ public class BorrowingResponse {
     }
 
 
-    private void updateTotalPrice() {
+    public void updateTotalPrice() {
         this.totalPrice = devices.stream().mapToDouble(Device::calculateTotalPrice).sum();
     }
 }

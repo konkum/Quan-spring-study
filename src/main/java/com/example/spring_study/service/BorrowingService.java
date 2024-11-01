@@ -2,10 +2,7 @@ package com.example.spring_study.service;
 
 import com.example.spring_study.constant.Type;
 import com.example.spring_study.model.Borrowing;
-import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
-import com.example.spring_study.model.payload.BorrowingRequest;
-import com.example.spring_study.model.payload.BorrowingResponse;
+import com.example.spring_study.model.payload.*;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
@@ -22,7 +19,7 @@ public interface BorrowingService {
 
     public Page<BorrowingResponse> getAllBorrowing(BaseSearchRequest request);
 
-    public Page<BorrowingResponse> getBorrowingsSortedBy(BaseSortRequest request);
+    public Page<BorrowingResponse> getBorrowingsSortedBy(BorrowingSortRequest request);
 
     public Page<BorrowingResponse> findByDeviceName(String name, BaseSearchRequest request);
 

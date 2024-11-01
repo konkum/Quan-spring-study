@@ -17,5 +17,5 @@ public @interface ValidateSortField {
     Class<? extends Payload>[] payload() default {};
 
     // New parameter for the target class
-    Class<?> targetClass();
+    Class<?> entityClass();
 }

@@ -6,6 +6,7 @@ import com.example.spring_study.model.Device;
 import com.example.spring_study.model.payload.BaseSearchRequest;
 import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.DeviceRequest;
+import com.example.spring_study.model.payload.DeviceSortRequest;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
@@ -20,5 +21,5 @@ public interface DeviceService {
     public Page<Device> findDeviceByDate(LocalDateTime startDate,LocalDateTime endDate,BaseSearchRequest request);
     public Page<Device> findDeviceByType(Type type, BaseSearchRequest request);
     public Page<Device> findDeviceByRateType(RateType rateType, BaseSearchRequest request);
-    public Page<Device> getDevicesSortedBy(BaseSortRequest request);
+    public Page<Device> getDevicesSortedBy(DeviceSortRequest request);
 }

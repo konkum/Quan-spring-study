@@ -7,11 +7,13 @@ import static org.mockito.Mockito.*;
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
+import com.example.spring_study.exception.DeviceNotFoundException;
 import com.example.spring_study.model.DateAudit;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.payload.BaseSearchRequest;
 import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.DeviceRequest;
+import com.example.spring_study.model.payload.DeviceSortRequest;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.service.impl.DeviceServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -166,7 +168,7 @@ public class DeviceServiceTests {
 
     @Test
     void testViewDevicesSortedByPrice() {
-        BaseSortRequest baseSearchRequest = new BaseSortRequest();
+        DeviceSortRequest baseSearchRequest = new DeviceSortRequest();
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("originalPrice");
@@ -189,7 +191,7 @@ public class DeviceServiceTests {
 
     @Test
     void testViewDevicesSortedByCreatedAt() {
-        BaseSortRequest baseSearchRequest = new BaseSortRequest();
+        DeviceSortRequest baseSearchRequest = new DeviceSortRequest();
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("dateAudit.createdAt");
@@ -319,10 +321,9 @@ public class DeviceServiceTests {
         when(deviceRepository.findById(999)).thenReturn(Optional.empty());
 
         // Act
-        Device foundDevice = deviceService.getDeviceById(999);
+        DeviceNotFoundException foundDevice = assertThrows(DeviceNotFoundException.class, () -> deviceService.getDeviceById(999));
 
         // Assert
-        assertNull(foundDevice);
         verify(deviceRepository, times(1)).findById(anyInt());
     }
 
@@ -384,7 +385,7 @@ public class DeviceServiceTests {
 
     @Test
     void testViewDevicesSortedByPrice_NotFound() {
-        BaseSortRequest baseSearchRequest = new BaseSortRequest();
+        DeviceSortRequest baseSearchRequest = new DeviceSortRequest();
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("originalPrice");

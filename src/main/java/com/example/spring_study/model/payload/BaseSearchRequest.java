@@ -16,6 +16,6 @@ public class BaseSearchRequest {
     @Min(value = 0, message = "page number have to be above 0")
     private int pageNumber;
     @NonNull
-    @Min(value = 0, message = "page size have to be above 0")
+    @Min(value = 1, message = "page size have to be above 1")
     private int pageSize = 10;
 }

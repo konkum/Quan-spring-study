@@ -176,7 +176,7 @@ public class BorrowingControllerTests {
     @Test
     void testGetAllBorrowingsSortedByTotalPrice() throws Exception {
         List<BorrowingResponse> borrowings = List.of(borrowing2, borrowing);
-        when(borrowingService.getBorrowingsSortedBy(any(BaseSortRequest.class))).thenReturn(new PageImpl<>(borrowings));
+        when(borrowingService.getBorrowingsSortedBy(any(BorrowingSortRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/getBorrowingsSortedBy")
                         .param("pageNumber", "0")
@@ -188,13 +188,13 @@ public class BorrowingControllerTests {
                 .andExpect(jsonPath("$.content[0].totalPrice").value(borrowing2.getTotalPrice()))
                 .andExpect(jsonPath("$.content[1].totalPrice").value(borrowing.getTotalPrice()));
 
-        verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BaseSortRequest.class));
+        verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BorrowingSortRequest.class));
     }
 
     @Test
     void testGetAllBorrowingsSortedByHandOverDate() throws Exception {
         List<BorrowingResponse> borrowings = List.of(borrowing2, borrowing);
-        when(borrowingService.getBorrowingsSortedBy(any(BaseSortRequest.class))).thenReturn(new PageImpl<>(borrowings));
+        when(borrowingService.getBorrowingsSortedBy(any(BorrowingSortRequest.class))).thenReturn(new PageImpl<>(borrowings));
 
         mockMvc.perform(get("/api/v1/borrowing/getBorrowingsSortedBy")
                         .param("pageNumber", "0")
@@ -206,7 +206,7 @@ public class BorrowingControllerTests {
                 .andExpect(jsonPath("$.content[0].dateAudit.handOverDate").value(borrowing2.getDateAudit().getHandOverDate().toString()))
                 .andExpect(jsonPath("$.content[1].dateAudit.handOverDate").value(borrowing.getDateAudit().getHandOverDate().toString()));
 
-        verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BaseSortRequest.class));
+        verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BorrowingSortRequest.class));
     }
 
     @Test
@@ -341,7 +341,7 @@ public class BorrowingControllerTests {
     @Test
     void testGetAllBorrowingsSortedByTotalPrice_NotFound() throws Exception {
         List<BorrowingResponse> borrowings = List.of(borrowing2, borrowing);
-        when(borrowingService.getBorrowingsSortedBy(any(BaseSortRequest.class))).thenReturn(Page.empty());
+        when(borrowingService.getBorrowingsSortedBy(any(BorrowingSortRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/borrowing/getBorrowingsSortedBy")
                         .param("pageNumber", "0")
@@ -350,7 +350,7 @@ public class BorrowingControllerTests {
                         .param("sortDirection", "ASC"))
                 .andExpect(status().isNotFound());
 
-        verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BaseSortRequest.class));
+        verify(borrowingService, times(1)).getBorrowingsSortedBy(any(BorrowingSortRequest.class));
     }
 
     @Test

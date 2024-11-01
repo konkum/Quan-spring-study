@@ -3,10 +3,7 @@ package com.example.spring_study.controller;
 import com.example.spring_study.constant.ProjectRole;
 import com.example.spring_study.constant.Type;
 import com.example.spring_study.model.Borrowing;
-import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
-import com.example.spring_study.model.payload.BorrowingRequest;
-import com.example.spring_study.model.payload.BorrowingResponse;
+import com.example.spring_study.model.payload.*;
 import com.example.spring_study.service.BorrowingService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -53,7 +50,7 @@ public class BorrowingController {
     }
 
     @GetMapping(path = "/getBorrowingsSortedBy")
-    private ResponseEntity<Page<BorrowingResponse>> getBorrowingsSortedBy(@Valid @ModelAttribute BaseSortRequest request) {
+    private ResponseEntity<Page<BorrowingResponse>> getBorrowingsSortedBy(@Valid @ModelAttribute BorrowingSortRequest request) {
         Page<BorrowingResponse> borrowings = borrowingService.getBorrowingsSortedBy(request);
         if (borrowings == null || borrowings.isEmpty()) {
             return ResponseEntity.notFound().build();

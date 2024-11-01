@@ -9,10 +9,7 @@ import com.example.spring_study.mapping.BorrowingMapper;
 import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.Employee;
-import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
-import com.example.spring_study.model.payload.BorrowingRequest;
-import com.example.spring_study.model.payload.BorrowingResponse;
+import com.example.spring_study.model.payload.*;
 import com.example.spring_study.repository.BorrowingRepository;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.repository.EmployeeRepository;
@@ -149,7 +146,7 @@ public class BorrowingServiceImpl implements BorrowingService {
     }
 
     @Override
-    public Page<BorrowingResponse> getBorrowingsSortedBy(BaseSortRequest request) {
+    public Page<BorrowingResponse> getBorrowingsSortedBy(BorrowingSortRequest request) {
         Sort sort = Sort.by(Sort.Order.asc(request.getSortString()));
         SortParam sortParam = SortParam.valueOf(request.getSortDirection());
         if (sortParam != null) {

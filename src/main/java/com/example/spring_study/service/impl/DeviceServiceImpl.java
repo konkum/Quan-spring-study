@@ -6,8 +6,8 @@ import com.example.spring_study.constant.Type;
 import com.example.spring_study.exception.DeviceNotFoundException;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.DeviceRequest;
+import com.example.spring_study.model.payload.DeviceSortRequest;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.service.DeviceService;
 import lombok.extern.slf4j.Slf4j;
@@ -138,7 +138,7 @@ public class DeviceServiceImpl implements DeviceService {
     }
 
     @Override
-    public Page<Device> getDevicesSortedBy(BaseSortRequest request) {
+    public Page<Device> getDevicesSortedBy(DeviceSortRequest request) {
         Sort sort = Sort.by(Sort.Order.asc(request.getSortString()));
         SortParam sortParam = SortParam.valueOf(request.getSortDirection());
         if (sortParam != null) {

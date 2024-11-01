@@ -3,15 +3,16 @@ package com.example.spring_study.service;
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
+import com.example.spring_study.exception.BorrowingNotFoundException;
+import com.example.spring_study.exception.DeviceNotFoundException;
+import com.example.spring_study.exception.EmployeeNotFoundException;
 import com.example.spring_study.mapping.BorrowingMapper;
+import com.example.spring_study.mapping.BorrowingMapperImpl;
 import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.DateAudit;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.Employee;
-import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
-import com.example.spring_study.model.payload.BorrowingRequest;
-import com.example.spring_study.model.payload.BorrowingResponse;
+import com.example.spring_study.model.payload.*;
 import com.example.spring_study.repository.BorrowingRepository;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.repository.EmployeeRepository;
@@ -22,6 +23,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.*;
 
@@ -35,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@SpringBootTest
 @ExtendWith({MockitoExtension.class})
 public class BorrowingServiceTests {
     @Mock
@@ -55,6 +59,9 @@ public class BorrowingServiceTests {
     private Borrowing borrowing;
     private Borrowing borrowing2;
     private BorrowingRequest borrowingRequest;
+    private EmployeeResponse employeeResponse;
+    private BorrowingResponse borrowingResponse;
+    private BorrowingResponse borrowingResponse2;
     private Device device1;
     private Device device2;
     private Employee employee;
@@ -92,6 +99,8 @@ public class BorrowingServiceTests {
 
         employee = new Employee();
         employee.setId(1);
+        employee.setUserName("John");
+        employee.setPassword("123456");
         employee.setFullName("Name 1");
         employee.setPhoneNumber("PhoneNumber");
         employee.setAddress("Address 1");
@@ -105,6 +114,22 @@ public class BorrowingServiceTests {
         borrowing.setDevices(new ArrayList<>(Arrays.asList(device1, device2)));
         borrowing.updateTotalPrice();
 
+        employeeResponse = new EmployeeResponse();
+        employeeResponse.setId(1);
+        employeeResponse.setUserName("John");
+        employeeResponse.setFullName("Name 1");
+        employeeResponse.setPhoneNumber("PhoneNumber");
+        employeeResponse.setAddress("Address 1");
+        employeeResponse.setAccountBalance(1000.0);
+
+        borrowingResponse = new BorrowingResponse();
+        borrowingResponse.setId(1);
+        borrowingResponse.setDateAudit(dateAudit);
+        borrowingResponse.getDateAudit().setHandOverDate(LocalDateTime.now(fixedClock));
+        borrowingResponse.setEmployee(employeeResponse);
+        borrowingResponse.setDevices(new ArrayList<>(Arrays.asList(device1, device2)));
+        borrowingResponse.updateTotalPrice();
+
         DateAudit dateAudit1;
         dateAudit1 = new DateAudit();
         dateAudit1.setCreatedAt(LocalDateTime.now(fixedClock));
@@ -115,6 +140,14 @@ public class BorrowingServiceTests {
         borrowing2.setEmployee(employee);
         borrowing2.setDevices(new ArrayList<>(Arrays.asList(device1)));
         borrowing2.updateTotalPrice();
+
+        borrowingResponse2 = new BorrowingResponse();
+        borrowingResponse2.setId(2);
+        borrowingResponse2.setDateAudit(dateAudit1);
+        borrowingResponse2.getDateAudit().setHandOverDate(LocalDateTime.now(fixedClock).minusDays(1));
+        borrowingResponse2.setEmployee(employeeResponse);
+        borrowingResponse2.setDevices(new ArrayList<>(Arrays.asList(device1)));
+        borrowingResponse2.updateTotalPrice();
 
         borrowingRequest = new BorrowingRequest();
         borrowingRequest.setDevicesId(List.of(1));
@@ -128,6 +161,7 @@ public class BorrowingServiceTests {
         when(deviceRepository.findById(1)).thenReturn(Optional.of(device1));
         lenient().when(deviceRepository.findById(2)).thenReturn(Optional.of(device2));
         when(borrowingRepository.save(any(Borrowing.class))).thenReturn(borrowing);
+        when(mapper.borrowingToBorrowingResponse(any(Borrowing.class))).thenReturn(borrowingResponse);
 
         // Act
         BorrowingResponse createdBorrowing = borrowingService.createBorrowing(borrowingRequest);
@@ -149,6 +183,7 @@ public class BorrowingServiceTests {
     void testGetBorrowingById() {
         // Arrange
         when(borrowingRepository.findById(anyInt())).thenReturn(Optional.of(borrowing));
+        when(mapper.borrowingToBorrowingResponse(any(Borrowing.class))).thenReturn(borrowingResponse);
 
         // Act
         BorrowingResponse foundBorrowing = borrowingService.getBorrowingById(1);
@@ -167,6 +202,8 @@ public class BorrowingServiceTests {
         // Arrange
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing, borrowing2));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(page);
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse, borrowingResponse2));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
 
         // Act
         Page<BorrowingResponse> foundBorrowings = borrowingService.getAllBorrowing(baseSearchRequest);
@@ -194,7 +231,7 @@ public class BorrowingServiceTests {
     @Test
     void testGetAllBorrowingsSortedByTotalPrice() {
         // Arrange
-        BaseSortRequest baseSearchRequest = new BaseSortRequest();
+        BorrowingSortRequest baseSearchRequest = new BorrowingSortRequest();
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("totalPrice");
@@ -202,6 +239,9 @@ public class BorrowingServiceTests {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("totalPrice").ascending());
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing2, borrowing));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(page);
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse2, borrowingResponse));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
+
 
         // Act
         Page<BorrowingResponse> result = borrowingService.getBorrowingsSortedBy(baseSearchRequest);
@@ -216,7 +256,7 @@ public class BorrowingServiceTests {
     @Test
     void testGetAllBorrowingsSortedByHandoverDate() {
         // Arrange
-        BaseSortRequest baseSearchRequest = new BaseSortRequest();
+        BorrowingSortRequest baseSearchRequest = new BorrowingSortRequest();
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("dateAudit.handOverDate");
@@ -224,6 +264,9 @@ public class BorrowingServiceTests {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("dateAudit.handOverDate").ascending());
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing2, borrowing));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(page);
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse2, borrowingResponse));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
+
 
         // Act
         Page<BorrowingResponse> result = borrowingService.getBorrowingsSortedBy(baseSearchRequest);
@@ -242,6 +285,9 @@ public class BorrowingServiceTests {
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
+
 
         when(borrowingRepository.findByDeviceName(anyString(), any(Pageable.class))).thenReturn(page);
 
@@ -266,6 +312,8 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByDateAudit_HandOverDateBetween(any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class))).thenReturn(page);
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByHandOverDate(startDate, endDate, baseSearchRequest);
@@ -285,6 +333,8 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByDeviceType(any(Type.class), any(Pageable.class))).thenReturn(page);
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByDeviceType(Type.MOUSE, baseSearchRequest);
@@ -304,6 +354,8 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByTotalPrice(anyDouble(), any(Pageable.class))).thenReturn(page);
+        Page<BorrowingResponse> pageResponse = new PageImpl<>(List.of(borrowingResponse));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(pageResponse);
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByTotalPrice(290.0, baseSearchRequest);
@@ -317,9 +369,11 @@ public class BorrowingServiceTests {
     @Test
     void testTransferDevice() {
         // Arrange
+        borrowingResponse.getDevices().remove(0);
         when(borrowingRepository.findById(1)).thenReturn(Optional.of(borrowing));
         when(borrowingRepository.findById(2)).thenReturn(Optional.of(borrowing2));
         when(borrowingRepository.save(any(Borrowing.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(mapper.borrowingsToResponses(any())).thenReturn(List.of(borrowingResponse, borrowingResponse2));
         // Act
         List<BorrowingResponse> result = borrowingService.transferDevice(1, 2, 1);
 
@@ -339,12 +393,14 @@ public class BorrowingServiceTests {
     void testCreateBorrowing_NotFoundEmployee() {
         // Arrange
         when(employeeRepository.findById(borrowing.getEmployee().getId())).thenReturn(Optional.empty());
+        when(mapper.borrowingToBorrowingResponse(any(Borrowing.class))).thenReturn(null);
 
         // Act
-        BorrowingResponse createdBorrowing = borrowingService.createBorrowing(borrowingRequest);
+        EmployeeNotFoundException employeeNotFoundException = assertThrows(EmployeeNotFoundException.class, () -> {
+            borrowingService.createBorrowing(borrowingRequest);
+        });
 
         // Assert
-        assertNull(createdBorrowing);
         verify(employeeRepository, times(1)).findById(borrowing.getEmployee().getId());
     }
 
@@ -353,12 +409,14 @@ public class BorrowingServiceTests {
         // Arrange
         when(employeeRepository.findById(borrowing.getEmployee().getId())).thenReturn(Optional.of(employee));
         when(deviceRepository.findById(1)).thenReturn(Optional.empty());
+        when(mapper.borrowingToBorrowingResponse(any(Borrowing.class))).thenReturn(null);
 
         // Act
-        BorrowingResponse createdBorrowing = borrowingService.createBorrowing(borrowingRequest);
+        DeviceNotFoundException deviceNotFoundException = assertThrows(DeviceNotFoundException.class, () -> {
+            borrowingService.createBorrowing(borrowingRequest);
+        });
 
         // Assert
-        assertNull(createdBorrowing);
         verify(employeeRepository, times(1)).findById(borrowing.getEmployee().getId());
         verify(deviceRepository, times(1)).findById(anyInt());
     }
@@ -367,12 +425,14 @@ public class BorrowingServiceTests {
     void testGetBorrowingById_NotFound() {
         // Arrange
         when(borrowingRepository.findById(anyInt())).thenReturn(Optional.empty());
+        when(mapper.borrowingToBorrowingResponse(any(Borrowing.class))).thenReturn(null);
 
         // Act
-        BorrowingResponse foundBorrowing = borrowingService.getBorrowingById(1);
+        BorrowingNotFoundException borrowingException = assertThrows(BorrowingNotFoundException.class, () -> {
+            borrowingService.getBorrowingById(1);
+        });
 
         // Assert
-        assertNull(foundBorrowing);
         verify(borrowingRepository, times(1)).findById(anyInt());
     }
 
@@ -384,6 +444,7 @@ public class BorrowingServiceTests {
         // Arrange
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing, borrowing2));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(new PageImpl<>(Collections.emptyList()));
 
         // Act
         Page<BorrowingResponse> foundBorrowings = borrowingService.getAllBorrowing(baseSearchRequest);
@@ -410,7 +471,7 @@ public class BorrowingServiceTests {
     @Test
     void testGetAllBorrowingsSortedByTotalPrice_NotFound() {
         // Arrange
-        BaseSortRequest baseSearchRequest = new BaseSortRequest();
+        BorrowingSortRequest baseSearchRequest = new BorrowingSortRequest();
         baseSearchRequest.setPageNumber(0);
         baseSearchRequest.setPageSize(10);
         baseSearchRequest.setSortString("totalPrice");
@@ -418,6 +479,7 @@ public class BorrowingServiceTests {
         Pageable pageable = PageRequest.of(0, 10, Sort.by("totalPrice").ascending());
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing2, borrowing));
         when(borrowingRepository.findAll(any(Pageable.class))).thenReturn(Page.empty());
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(Page.empty());
 
         // Act
         Page<BorrowingResponse> result = borrowingService.getBorrowingsSortedBy(baseSearchRequest);
@@ -436,6 +498,7 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByDeviceName(anyString(), any(Pageable.class))).thenReturn(Page.empty());
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(Page.empty());
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByDeviceName("Item 1", baseSearchRequest);
@@ -457,6 +520,7 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByDateAudit_HandOverDateBetween(any(LocalDateTime.class), any(LocalDateTime.class), any(Pageable.class))).thenReturn(Page.empty());
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(Page.empty());
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByHandOverDate(startDate, endDate, baseSearchRequest);
@@ -475,6 +539,7 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByDeviceType(any(Type.class), any(Pageable.class))).thenReturn(Page.empty());
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(Page.empty());
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByDeviceType(Type.MOUSE, baseSearchRequest);
@@ -493,6 +558,7 @@ public class BorrowingServiceTests {
         Page<Borrowing> page = new PageImpl<>(List.of(borrowing));
 
         when(borrowingRepository.findByTotalPrice(anyDouble(), any(Pageable.class))).thenReturn(Page.empty());
+        when(mapper.borrowingPageToResponsePage(any())).thenReturn(Page.empty());
 
         // Act
         Page<BorrowingResponse> result = borrowingService.findByTotalPrice(240.0, baseSearchRequest);
@@ -507,10 +573,11 @@ public class BorrowingServiceTests {
         // Arrange
         when(borrowingRepository.findById(1)).thenReturn(Optional.empty());
         // Act
-        List<BorrowingResponse> result = borrowingService.transferDevice(1, 2, 1);
+        BorrowingNotFoundException borrowingException = assertThrows(BorrowingNotFoundException.class, () -> {
+            borrowingService.transferDevice(1, 2, 1);
+        });
 
         // Assert
-        assertEquals(0, result.size());
 
         verify(borrowingRepository).findById(1);
     }
@@ -521,10 +588,11 @@ public class BorrowingServiceTests {
         when(borrowingRepository.findById(1)).thenReturn(Optional.of(borrowing));
         when(borrowingRepository.findById(2)).thenReturn(Optional.empty());
         // Act
-        List<BorrowingResponse> result = borrowingService.transferDevice(1, 2, 1);
+        BorrowingNotFoundException borrowingException = assertThrows(BorrowingNotFoundException.class, () -> {
+            borrowingService.transferDevice(1, 2, 1);
+        });
 
         // Assert
-        assertEquals(0, result.size());
 
         verify(borrowingRepository).findById(1);
         verify(borrowingRepository).findById(2);

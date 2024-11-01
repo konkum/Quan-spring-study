@@ -13,6 +13,7 @@ import com.example.spring_study.service.EmployeeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -80,6 +81,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 });
         return mapper.toResponse(employee);
     }
+
 
     @Override
     public List<EmployeeResponse> getAllEmployees() {

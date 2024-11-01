@@ -9,10 +9,12 @@ import java.util.stream.Stream;
 
 public class ValueOfEnumValidator implements ConstraintValidator<ValueOfEnum, CharSequence> {
     private List<String> acceptedValues;
+    private Class<? extends Enum<?>> enumClass;
 
     @Override
     public void initialize(ValueOfEnum annotation) {
-        acceptedValues = Stream.of(annotation.enumClass().getEnumConstants())
+        enumClass = annotation.enumClass();
+        acceptedValues = Stream.of(enumClass.getEnumConstants())
                 .map(Enum::name)
                 .collect(Collectors.toList());
     }
@@ -20,9 +22,20 @@ public class ValueOfEnumValidator implements ConstraintValidator<ValueOfEnum, Ch
     @Override
     public boolean isValid(CharSequence value, ConstraintValidatorContext context) {
         if (value == null) {
-            return true;
+            return false;
         }
 
-        return acceptedValues.contains(value.toString());
+        if (!acceptedValues.contains(value.toString())) {
+            context.disableDefaultConstraintViolation();
+            context.buildConstraintViolationWithTemplate(
+                            String.format("Invalid value: '%s'. Accepted values for %s are: %s",
+                                    value,
+                                    enumClass.getSimpleName(),
+                                    String.join(", ", acceptedValues)))
+                    .addConstraintViolation();
+            return false;
+        }
+
+        return true;
     }
 }

@@ -4,9 +4,7 @@ import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.Type;
 import com.example.spring_study.model.DateAudit;
 import com.example.spring_study.model.Device;
-import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
-import com.example.spring_study.model.payload.DeviceRequest;
+import com.example.spring_study.model.payload.*;
 import com.example.spring_study.service.DeviceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -112,7 +110,7 @@ public class DeviceControllerTests {
                 .andExpect(jsonPath("$.unitPrice").value(110.0))
                 .andExpect(jsonPath("$.rateType").value("LIKENEW"));
 
-        verify(deviceService,times(1)).createDevice(any(DeviceRequest.class));
+        verify(deviceService, times(1)).createDevice(any(DeviceRequest.class));
     }
 
     @Test
@@ -121,29 +119,29 @@ public class DeviceControllerTests {
 
         mockMvc.perform(get("/api/v1/device/get")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","1"))
+                        .param("id", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.type").value("MOUSE"))
                 .andExpect(jsonPath("$.unitPrice").value(110.0))
                 .andExpect(jsonPath("$.rateType").value("LIKENEW"));
 
-        verify(deviceService,times(1)).getDeviceById(anyInt());
+        verify(deviceService, times(1)).getDeviceById(anyInt());
     }
 
     @Test
     void testGetDevices() throws Exception {
-        when(deviceService.getAllDevices(any())).thenReturn(new PageImpl<>(List.of(device1,device2)));
+        when(deviceService.getAllDevices(any())).thenReturn(new PageImpl<>(List.of(device1, device2)));
 
         mockMvc.perform(get("/api/v1/device/getAll")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(2)))
+                .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id").value(1));
 
-        verify(deviceService,times(1)).getAllDevices(any());
+        verify(deviceService, times(1)).getAllDevices(any());
     }
 
     @Test
@@ -152,110 +150,110 @@ public class DeviceControllerTests {
 
         mockMvc.perform(delete("/api/v1/device/delete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","1"))
+                        .param("id", "1"))
                 .andExpect(status().isOk());
 
-        verify(deviceService,times(1)).deleteDevice(anyInt());
+        verify(deviceService, times(1)).deleteDevice(anyInt());
     }
 
     @Test
     void testGetDevicesSortByOriginalPrice() throws Exception {
-        when(deviceService.getDevicesSortedBy(any())).thenReturn(new PageImpl<>(List.of(device1,device2)));
+        when(deviceService.getDevicesSortedBy(any())).thenReturn(new PageImpl<>(List.of(device1, device2)));
 
         mockMvc.perform(get("/api/v1/device/getDevicesSortBy")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("pageNumber","0")
-                        .param("pageSize","10")
-                        .param("sortString","originalPrice")
-                        .param("sortDirection","ASC"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10")
+                        .param("sortString", "originalPrice")
+                        .param("sortDirection", "ASC"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(2)))
+                .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id").value(1));
 
-        verify(deviceService,times(1)).getDevicesSortedBy(any());
+        verify(deviceService, times(1)).getDevicesSortedBy(any());
     }
 
     @Test
     void testGetDevicesSortByCreatedDate() throws Exception {
-        when(deviceService.getDevicesSortedBy(any())).thenReturn(new PageImpl<>(List.of(device1,device2)));
+        when(deviceService.getDevicesSortedBy(any())).thenReturn(new PageImpl<>(List.of(device1, device2)));
 
         mockMvc.perform(get("/api/v1/device/getDevicesSortBy")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("pageNumber","0")
-                        .param("pageSize","10")
-                        .param("sortString","dateAudit.createdAt")
-                        .param("sortDirection","ASC"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10")
+                        .param("sortString", "dateAudit.createdAt")
+                        .param("sortDirection", "ASC"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(2)))
+                .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].dateAudit.createdAt").value(device1.getDateAudit().getCreatedAt().toString()))
                 .andExpect(jsonPath("$.content[1].dateAudit.createdAt").value(device2.getDateAudit().getCreatedAt().toString()));
 
-        verify(deviceService,times(1)).getDevicesSortedBy(any());
+        verify(deviceService, times(1)).getDevicesSortedBy(any());
     }
 
     @Test
     void testSearchDeviceByCreatedAtDate() throws Exception {
-        when(deviceService.findDeviceByDate(any(),any(),any())).thenReturn(new PageImpl<>(List.of(device1)));
+        when(deviceService.findDeviceByDate(any(), any(), any())).thenReturn(new PageImpl<>(List.of(device1)));
 
         mockMvc.perform(get("/api/v1/device/findByCreatedDate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("startDate",LocalDateTime.now(fixedClock).minusDays(1).toString())
-                        .param("endDate",LocalDateTime.now(fixedClock).plusDays(1).toString())
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("startDate", LocalDateTime.now(fixedClock).minusDays(1).toString())
+                        .param("endDate", LocalDateTime.now(fixedClock).plusDays(1).toString())
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].dateAudit.createdAt").value(device1.getDateAudit().getCreatedAt().toString()));
 
-        verify(deviceService,times(1)).findDeviceByDate(any(),any(),any());
+        verify(deviceService, times(1)).findDeviceByDate(any(), any(), any());
     }
 
     @Test
     void testSearchDeviceByItemName() throws Exception {
-        when(deviceService.findDeviceByItemName(anyString(),any())).thenReturn(new PageImpl<>(List.of(device1)));
+        when(deviceService.findDeviceByItemName(anyString(), any())).thenReturn(new PageImpl<>(List.of(device1)));
 
         mockMvc.perform(get("/api/v1/device/findByItemName")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("itemName","Item 1")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("itemName", "Item 1")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].itemName").value("Item 1"));
 
-        verify(deviceService,times(1)).findDeviceByItemName(anyString(),any());
+        verify(deviceService, times(1)).findDeviceByItemName(anyString(), any());
     }
 
     @Test
     void testSearchDeviceByType() throws Exception {
-        when(deviceService.findDeviceByType(any(),any())).thenReturn(new PageImpl<>(List.of(device1)));
+        when(deviceService.findDeviceByType(any(), any())).thenReturn(new PageImpl<>(List.of(device1)));
 
         mockMvc.perform(get("/api/v1/device/findByType")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("type","MOUSE")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("type", "MOUSE")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].type").value("MOUSE"));
 
-        verify(deviceService,times(1)).findDeviceByType(any(),any());
+        verify(deviceService, times(1)).findDeviceByType(any(), any());
     }
 
     @Test
     void testSearchDeviceByRateType() throws Exception {
-        when(deviceService.findDeviceByRateType(any(),any())).thenReturn(new PageImpl<>(List.of(device1)));
+        when(deviceService.findDeviceByRateType(any(), any())).thenReturn(new PageImpl<>(List.of(device1)));
 
         mockMvc.perform(get("/api/v1/device/findByRateType")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("rateType","LIKENEW")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("rateType", "LIKENEW")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content",hasSize(1)))
+                .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].rateType").value("LIKENEW"));
 
-        verify(deviceService,times(1)).findDeviceByRateType(any(),any());
+        verify(deviceService, times(1)).findDeviceByRateType(any(), any());
     }
 
     @Test
@@ -268,7 +266,7 @@ public class DeviceControllerTests {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotAcceptable());
 
-        verify(deviceService,times(1)).createDevice(any(DeviceRequest.class));
+        verify(deviceService, times(1)).createDevice(any(DeviceRequest.class));
     }
 
     @Test
@@ -277,10 +275,10 @@ public class DeviceControllerTests {
 
         mockMvc.perform(get("/api/v1/device/get")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","999"))
+                        .param("id", "999"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).getDeviceById(anyInt());
+        verify(deviceService, times(1)).getDeviceById(anyInt());
     }
 
     @Test
@@ -289,11 +287,11 @@ public class DeviceControllerTests {
 
         mockMvc.perform(get("/api/v1/device/getAll")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("pageNumber","0")
-                        .param("pageSize","0"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "0"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).getAllDevices(any());
+        verify(deviceService, times(1)).getAllDevices(any());
     }
 
     @Test
@@ -302,54 +300,54 @@ public class DeviceControllerTests {
 
         mockMvc.perform(delete("/api/v1/device/delete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("id","999"))
+                        .param("id", "999"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).deleteDevice(anyInt());
+        verify(deviceService, times(1)).deleteDevice(anyInt());
     }
 
     @Test
     void testGetDevicesSortByOriginalPrice_NotFound() throws Exception {
-        when(deviceService.getDevicesSortedBy(any(BaseSortRequest.class))).thenReturn(Page.empty());
+        when(deviceService.getDevicesSortedBy(any(DeviceSortRequest.class))).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/device/getDevicesSortBy")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("pageNumber","0")
-                        .param("pageSize","10")
-                        .param("sortString","originalPrice")
-                        .param("sortDirection","ASC"))
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10")
+                        .param("sortString", "originalPrice")
+                        .param("sortDirection", "ASC"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).getDevicesSortedBy(any());
+        verify(deviceService, times(1)).getDevicesSortedBy(any());
     }
 
     @Test
     void testSearchDeviceByCreatedAtDate_NotFound() throws Exception {
-        when(deviceService.findDeviceByDate(any(),any(),any())).thenReturn(Page.empty());
+        when(deviceService.findDeviceByDate(any(), any(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/device/findByCreatedDate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("startDate",LocalDateTime.now(fixedClock).plusHours(1).toString())
-                        .param("endDate",LocalDateTime.now(fixedClock).plusDays(1).toString())
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("startDate", LocalDateTime.now(fixedClock).plusHours(1).toString())
+                        .param("endDate", LocalDateTime.now(fixedClock).plusDays(1).toString())
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).findDeviceByDate(any(),any(),any());
+        verify(deviceService, times(1)).findDeviceByDate(any(), any(), any());
     }
 
     @Test
     void testSearchDeviceByItemName_NotFound() throws Exception {
-        when(deviceService.findDeviceByItemName(anyString(),any())).thenReturn(Page.empty());
+        when(deviceService.findDeviceByItemName(anyString(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/device/findByItemName")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("itemName","Item 3")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("itemName", "Item 3")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).findDeviceByItemName(anyString(),any());
+        verify(deviceService, times(1)).findDeviceByItemName(anyString(), any());
     }
 
     @Test
@@ -357,26 +355,26 @@ public class DeviceControllerTests {
 
         mockMvc.perform(get("/api/v1/device/findByType")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("type","TEST")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("type", "TEST")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isBadRequest());
 
-        verify(deviceService,never()).findDeviceByType(any(),any());
+        verify(deviceService, never()).findDeviceByType(any(), any());
     }
 
     @Test
     void testSearchDeviceByType_NotFound() throws Exception {
-        when(deviceService.findDeviceByType(any(),any())).thenReturn(Page.empty());
+        when(deviceService.findDeviceByType(any(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/device/findByType")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("type","MOUSE")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("type", "MOUSE")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).findDeviceByType(any(),any());
+        verify(deviceService, times(1)).findDeviceByType(any(), any());
     }
 
     @Test
@@ -384,26 +382,26 @@ public class DeviceControllerTests {
 
         mockMvc.perform(get("/api/v1/device/findByRateType")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("rateType","TEST")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("rateType", "TEST")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isBadRequest());
 
-        verify(deviceService,never()).findDeviceByRateType(any(),any());
+        verify(deviceService, never()).findDeviceByRateType(any(), any());
     }
 
     @Test
     void testSearchDeviceByRateType_NotFound() throws Exception {
-        when(deviceService.findDeviceByRateType(any(),any())).thenReturn(Page.empty());
+        when(deviceService.findDeviceByRateType(any(), any())).thenReturn(Page.empty());
 
         mockMvc.perform(get("/api/v1/device/findByRateType")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .param("rateType","NEW")
-                        .param("pageNumber","0")
-                        .param("pageSize","10"))
+                        .param("rateType", "NEW")
+                        .param("pageNumber", "0")
+                        .param("pageSize", "10"))
                 .andExpect(status().isNotFound());
 
-        verify(deviceService,times(1)).findDeviceByRateType(any(),any());
+        verify(deviceService, times(1)).findDeviceByRateType(any(), any());
     }
 
 }
