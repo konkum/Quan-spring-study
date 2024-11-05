@@ -1,4 +1,4 @@
-package com.example.spring_study.service.impl;
+package com.example.spring_study.services.impl;
 
 import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
@@ -13,7 +13,7 @@ import com.example.spring_study.model.payload.*;
 import com.example.spring_study.repository.BorrowingRepository;
 import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.repository.EmployeeRepository;
-import com.example.spring_study.service.BorrowingService;
+import com.example.spring_study.services.BorrowingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

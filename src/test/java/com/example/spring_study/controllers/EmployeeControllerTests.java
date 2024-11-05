@@ -1,11 +1,9 @@
-package com.example.spring_study.controller;
+package com.example.spring_study.controllers;
 
-import com.example.spring_study.model.Employee;
 import com.example.spring_study.model.payload.EmployeeRequest;
 import com.example.spring_study.model.payload.EmployeeResponse;
 import com.example.spring_study.model.payload.EmployeeResponseUpdate;
-import com.example.spring_study.service.EmployeeService;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.spring_study.services.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;

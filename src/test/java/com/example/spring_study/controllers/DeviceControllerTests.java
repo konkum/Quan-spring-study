@@ -1,11 +1,11 @@
-package com.example.spring_study.controller;
+package com.example.spring_study.controllers;
 
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.Type;
 import com.example.spring_study.model.DateAudit;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.payload.*;
-import com.example.spring_study.service.DeviceService;
+import com.example.spring_study.services.DeviceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

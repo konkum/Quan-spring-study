@@ -1,10 +1,9 @@
-package com.example.spring_study.controller;
+package com.example.spring_study.controllers;
 
 import com.example.spring_study.model.payload.JwtAuthResponse;
 import com.example.spring_study.model.payload.LoginRequest;
-import com.example.spring_study.service.AuthService;
+import com.example.spring_study.services.AuthService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

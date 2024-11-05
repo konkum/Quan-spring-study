@@ -1,4 +1,4 @@
-package com.example.spring_study.service;
+package com.example.spring_study.services;
 
 import com.example.spring_study.exception.EmployeeNotFoundException;
 import com.example.spring_study.mapping.EmployeeMapper;
@@ -7,11 +7,9 @@ import com.example.spring_study.model.Role;
 import com.example.spring_study.model.payload.EmployeeRequest;
 import com.example.spring_study.model.payload.EmployeeResponse;
 import com.example.spring_study.model.payload.EmployeeResponseUpdate;
-import com.example.spring_study.repository.DeviceRepository;
 import com.example.spring_study.repository.EmployeeRepository;
 import com.example.spring_study.repository.RoleRepository;
-import com.example.spring_study.service.impl.DeviceServiceImpl;
-import com.example.spring_study.service.impl.EmployeeServiceImpl;
+import com.example.spring_study.services.impl.EmployeeServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

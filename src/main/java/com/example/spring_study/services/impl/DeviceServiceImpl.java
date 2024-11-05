@@ -1,4 +1,4 @@
-package com.example.spring_study.service.impl;
+package com.example.spring_study.services.impl;
 
 import com.example.spring_study.constant.RateType;
 import com.example.spring_study.constant.SortParam;
@@ -9,7 +9,7 @@ import com.example.spring_study.model.payload.BaseSearchRequest;
 import com.example.spring_study.model.payload.DeviceRequest;
 import com.example.spring_study.model.payload.DeviceSortRequest;
 import com.example.spring_study.repository.DeviceRepository;
-import com.example.spring_study.service.DeviceService;
+import com.example.spring_study.services.DeviceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

@@ -1,21 +1,19 @@
-package com.example.spring_study.service;
+package com.example.spring_study.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.example.spring_study.constant.RateType;
-import com.example.spring_study.constant.SortParam;
 import com.example.spring_study.constant.Type;
 import com.example.spring_study.exception.DeviceNotFoundException;
 import com.example.spring_study.model.DateAudit;
 import com.example.spring_study.model.Device;
 import com.example.spring_study.model.payload.BaseSearchRequest;
-import com.example.spring_study.model.payload.BaseSortRequest;
 import com.example.spring_study.model.payload.DeviceRequest;
 import com.example.spring_study.model.payload.DeviceSortRequest;
 import com.example.spring_study.repository.DeviceRepository;
-import com.example.spring_study.service.impl.DeviceServiceImpl;
+import com.example.spring_study.services.impl.DeviceServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,8 +26,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

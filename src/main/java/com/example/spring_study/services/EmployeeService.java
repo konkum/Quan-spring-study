@@ -1,4 +1,4 @@
-package com.example.spring_study.service;
+package com.example.spring_study.services;
 
 import com.example.spring_study.model.payload.EmployeeRequest;
 import com.example.spring_study.model.payload.EmployeeResponse;

@@ -1,10 +1,9 @@
-package com.example.spring_study.controller;
+package com.example.spring_study.controllers;
 
-import com.example.spring_study.model.Employee;
 import com.example.spring_study.model.payload.EmployeeRequest;
 import com.example.spring_study.model.payload.EmployeeResponse;
 import com.example.spring_study.model.payload.EmployeeResponseUpdate;
-import com.example.spring_study.service.EmployeeService;
+import com.example.spring_study.services.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;

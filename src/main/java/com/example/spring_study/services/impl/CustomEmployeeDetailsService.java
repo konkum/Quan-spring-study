@@ -1,9 +1,8 @@
-package com.example.spring_study.service.impl;
+package com.example.spring_study.services.impl;
 
 import com.example.spring_study.model.Employee;
 import com.example.spring_study.repository.EmployeeRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,28 +1,19 @@
-package com.example.spring_study.controller;
+package com.example.spring_study.controllers;
 
-import com.example.spring_study.constant.ProjectRole;
 import com.example.spring_study.constant.Type;
-import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.payload.*;
-import com.example.spring_study.service.BorrowingService;
+import com.example.spring_study.services.BorrowingService;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.springframework.security.authorization.AuthorityAuthorizationManager.hasRole;
 
 @RestController
 @RequestMapping(path = "api/v1/borrowing")

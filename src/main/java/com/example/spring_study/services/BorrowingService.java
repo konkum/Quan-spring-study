@@ -1,7 +1,6 @@
-package com.example.spring_study.service;
+package com.example.spring_study.services;
 
 import com.example.spring_study.constant.Type;
-import com.example.spring_study.model.Borrowing;
 import com.example.spring_study.model.payload.*;
 import org.springframework.data.domain.Page;
 

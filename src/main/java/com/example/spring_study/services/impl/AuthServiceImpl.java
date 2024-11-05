@@ -1,10 +1,9 @@
-package com.example.spring_study.service.impl;
+package com.example.spring_study.services.impl;
 
 import com.example.spring_study.config.JwtTokenProvider;
 import com.example.spring_study.model.payload.LoginRequest;
-import com.example.spring_study.service.AuthService;
+import com.example.spring_study.services.AuthService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
