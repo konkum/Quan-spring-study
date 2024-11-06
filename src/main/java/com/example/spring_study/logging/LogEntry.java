@@ -3,7 +3,6 @@ package com.example.spring_study.logging;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.boot.logging.LogLevel;
 
 import java.time.LocalDateTime;

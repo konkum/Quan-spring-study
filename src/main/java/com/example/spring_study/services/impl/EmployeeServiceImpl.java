@@ -12,6 +12,7 @@ import com.example.spring_study.repository.RoleRepository;
 import com.example.spring_study.services.EmployeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,14 +22,17 @@ import java.util.Set;
 @Service
 @Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
-    @Autowired
     private RoleRepository roleRepository;
-    @Autowired
     private EmployeeRepository employeeRepository;
-    @Autowired
     private PasswordEncoder passwordEncoder;
-    @Autowired
     private EmployeeMapper mapper;
+
+    public EmployeeServiceImpl(RoleRepository roleRepository, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder, EmployeeMapper mapper) {
+        this.roleRepository = roleRepository;
+        this.employeeRepository = employeeRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.mapper = mapper;
+    }
 
     @Override
     public EmployeeResponse createEmployee(EmployeeRequest request) {

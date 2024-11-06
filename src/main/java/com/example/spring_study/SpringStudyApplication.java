@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
 @EnableJpaAuditing
+@EnableAspectJAutoProxy
 public class SpringStudyApplication {
 
     public static void main(String[] args) {
